@@ -15,12 +15,13 @@ The second is the Azure Key Vault Provider for Secrets Store CSI Driver which al
 
 The following steps are mainly taken from the following articles, but I will walk through in implementing the scenario outlined above.
 
-https://learn.microsoft.com/en-us/azure/aks/csi-secrets-store-driver
-https://learn.microsoft.com/en-us/azure/aks/csi-secrets-store-identity-access
+* https://learn.microsoft.com/en-us/azure/aks/csi-secrets-store-driver
+* https://learn.microsoft.com/en-us/azure/aks/csi-secrets-store-identity-access
+
 Assumptions
 
-An existing AKS Cluster. My demo Kubernetes version is 1.23.12
-An existing Azure Key Vault (in a different resource group and subscription than the AKS cluster)
+* An existing AKS Cluster. My demo Kubernetes version is 1.23.12
+* >An existing Azure Key Vault (in a different resource group and subscription than the AKS cluster)
 
 References:
 
