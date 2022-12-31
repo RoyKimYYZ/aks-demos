@@ -10,7 +10,6 @@ az login
 
 rgName='aks-solution'
 aksName='rkaksdev'
-location='canadacentral'
 
 keyVaultName='rkimKeyVault'
 keyVaultRG='Enterprise'
@@ -38,7 +37,7 @@ az aks enable-addons --addons azure-keyvault-secrets-provider --name $aksName --
 # Verify that the installation is finished by listing all pods that have the secrets-store-csi-driver and secrets-store-provider-azure labels in the kube-system namespace
 kubectl get pods -n kube-system -l 'app in (secrets-store-csi-driver, secrets-store-provider-azure)'
 
-# Use an existing Azure Key Vault and create a secret
+# Create a secret into an existing Key Vault
 az keyvault secret set --vault-name $keyVaultName -n ExampleSecret --value s3cr3tV@lue 
 
 # Create and assign workload identity
@@ -66,20 +65,21 @@ agentPoolVMSSRG='MC_aks-solution_rkaksdev_canadacentral'
 az vmss identity assign -g $agentPoolVMSSRG -n $agentPoolVMSS --identities $identityResourceId
 
 # set policy to access secrets in your key vault or set in Azure Portal in Key Vault > Access Policies
-az keyvault set-policy -g $keyVaultRG -n $keyVaultName --secret-permissions get --spn $identityClientId 
+az keyvault set-policy -g $keyVaultRG -n $keyVaultName  --subscription $keyVaultSubName --secret-permissions get --spn $identityClientId 
 
 
+# Create namespace for key vault demo
 kubectl create namespace $keyVaultDemoNamespace
-
 # Find key vault tenant ID
-keyvaultTenantId='d4697920-75d5-4b07-bdbb-ca7abb88444d'
+export keyvaultTenantId=$(az keyvault show  -g $keyVaultRG -n $keyVaultName --subscription $keyVaultSubName -o tsv --query properties.tenantId)
+echo $keyvaultTenantId
 
 cat <<EOF | kubectl apply -f -
 apiVersion: secrets-store.csi.x-k8s.io/v1
 kind: SecretProviderClass
 metadata:
   name: azure-rkimkv-secret-provider
-  namespace: keyvault-demo
+  namespace: $keyVaultDemoNamespace
 spec:
   provider: azure
   parameters:
@@ -108,7 +108,7 @@ apiVersion: secrets-store.csi.x-k8s.io/v1
 kind: SecretProviderClass
 metadata:
   name: azure-sync
-  namespace: keyvault-demo
+  namespace: $keyVaultDemoNamespace
 spec:
   provider: azure                             
   secretObjects:                              # [OPTIONAL] SecretObjects defines the desired state of synced Kubernetes secret objects
@@ -121,6 +121,7 @@ EOF
 
 kubectl get SecretProviderClass -n $keyVaultDemoNamespace
 
+# Create a Pod that mounts the secret from Azure Key Vault as a file and environment variable
 cat << EOF | kubectl apply -f -
 kind: Pod
 apiVersion: v1
@@ -154,14 +155,18 @@ spec:
 EOF
 
 ## show secrets held in secrets-store
-kubectl exec busybox-secrets-store-inline-uami -n keyvault-demo -- ls /mnt/secrets-store/ 
-
+kubectl exec busybox-secrets-store-inline-uami -n $keyVaultDemoNamespace -- ls /mnt/secrets-store/ 
 ## print a test secret 'ExampleSecret' held in secrets-store
-kubectl exec busybox-secrets-store-inline-uami -n keyvault-demo -- cat /mnt/secrets-store/ExampleSecret
+kubectl exec busybox-secrets-store-inline-uami -n $keyVaultDemoNamespace -- cat /mnt/secrets-store/ExampleSecret
+## Display the environment variables that includes the secret
+kubectl exec busybox-secrets-store-inline-uami -n $keyVaultDemoNamespace -- printenv
+kubectl exec busybox-secrets-store-inline-uami -n $keyVaultDemoNamespace -- echo $EXAMPLE_SECRET
+
+
 
 # refresh pod secret mount by deleting and then redeploy YAML manifest of pod defined above.
-kubectl delete pod/busybox-secrets-store-inline-uami -n keyvault-demo
-kubectl delete SecretProviderClass --all -n keyvaultdemo
+kubectl delete pod/busybox-secrets-store-inline-uami -n $keyVaultDemoNamespace
+kubectl delete SecretProviderClass --all -n $keyVaultDemoNamespace
 
 
 # Troubleshooting
