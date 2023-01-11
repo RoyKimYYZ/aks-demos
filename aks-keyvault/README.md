@@ -1,7 +1,6 @@
-## DEMO 1
+## DEMO 1 aks-keyvault.sh
 
 Scenario: You require a pod to mount a secret stored in an Azure Key Vault. So that an application running in the pod can access the secret as a file and environment variable. Also manage the access security between the AKS cluster to the key vault using a user assigned managed identity.
-
 
 Background:
 
@@ -28,3 +27,5 @@ References:
 * https://github.com/kubernetes-sigs/secrets-store-csi-driver
 * https://learn.microsoft.com/en-us/azure/aks/csi-secrets-store-driver
 * https://learn.microsoft.com/en-us/azure/aks/csi-secrets-store-identity-access
+
+## DEMO 2 aks-keyvault-secret-polling.sh

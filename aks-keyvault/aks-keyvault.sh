@@ -157,10 +157,10 @@ EOF
 ## show secrets held in secrets-store
 kubectl exec busybox-secrets-store-inline-uami -n $keyVaultDemoNamespace -- ls /mnt/secrets-store/ 
 ## print a test secret 'ExampleSecret' held in secrets-store
-kubectl exec busybox-secrets-store-inline-uami -n $keyVaultDemoNamespace -- cat /mnt/secrets-store/ExampleSecret
+kubectl exec busybox-secrets-store-inline-uami -n $keyVaultDemoNamespace -- cat /mnt/secrets-store/ExampleSecret; echo
 ## Display the environment variables that includes the secret
 kubectl exec busybox-secrets-store-inline-uami -n $keyVaultDemoNamespace -- printenv
-kubectl exec busybox-secrets-store-inline-uami -n $keyVaultDemoNamespace -- echo $EXAMPLE_SECRET
+kubectl exec busybox-secrets-store-inline-uami -n $keyVaultDemoNamespace -- env $EXAMPLE_SECRET
 
 
 
