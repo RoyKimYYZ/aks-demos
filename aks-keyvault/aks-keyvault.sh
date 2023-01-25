@@ -39,6 +39,8 @@ kubectl get pods -n kube-system -l 'app in (secrets-store-csi-driver, secrets-st
 
 # Create a secret into an existing Key Vault
 az keyvault secret set --vault-name $keyVaultName -n ExampleSecret --value s3cr3tV@lue 
+# Show secret value
+az keyvault secret show --name ExampleSecret --vault-name $keyVaultName 
 
 # Create and assign workload identity
 # Reference MSFT Article https://learn.microsoft.com/en-us/azure/aks/csi-secrets-store-identity-access
@@ -70,6 +72,9 @@ az keyvault set-policy -g $keyVaultRG -n $keyVaultName  --subscription $keyVault
 
 # Create namespace for key vault demo
 kubectl create namespace $keyVaultDemoNamespace
+
+kubectl config set-context --current --namespace=$keyVaultDemoNamespace
+
 # Find key vault tenant ID
 export keyvaultTenantId=$(az keyvault show  -g $keyVaultRG -n $keyVaultName --subscription $keyVaultSubName -o tsv --query properties.tenantId)
 echo $keyvaultTenantId
@@ -154,10 +159,12 @@ spec:
           secretProviderClass: "azure-rkimkv-secret-provider"
 EOF
 
+podname=$(kubectl get pods | grep busybox | awk '{print $1}')
+echo $podname
 ## show secrets held in secrets-store
-kubectl exec busybox-secrets-store-inline-uami -n $keyVaultDemoNamespace -- ls /mnt/secrets-store/ 
+kubectl exec $podname -n $keyVaultDemoNamespace -- ls /mnt/secrets-store/ 
 ## print a test secret 'ExampleSecret' held in secrets-store
-kubectl exec busybox-secrets-store-inline-uami -n $keyVaultDemoNamespace -- cat /mnt/secrets-store/ExampleSecret; echo
+kubectl exec $podname -n $keyVaultDemoNamespace -- cat /mnt/secrets-store/ExampleSecret; echo
 ## Display the environment variables that includes the secret
 kubectl exec busybox-secrets-store-inline-uami -n $keyVaultDemoNamespace -- printenv
 kubectl exec busybox-secrets-store-inline-uami -n $keyVaultDemoNamespace -- env $EXAMPLE_SECRET
