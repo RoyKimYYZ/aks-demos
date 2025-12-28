@@ -1,0 +1,31 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pvc-ragengine-vector-db
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: managed-csi-premium
+  resources:
+    requests:
+      storage: 50Gi
+---
+apiVersion: kaito.sh/v1alpha1
+kind: RAGEngine
+metadata:
+  name: ragengine-with-storage
+spec:
+  compute:
+    instanceType: "Standard_NC8as_T4_v3" #"Standard_NC6s_v3"
+    labelSelector:
+      matchLabels:
+        apps: ragengine-example
+  storage:
+    persistentVolumeClaim: pvc-ragengine-vector-db
+    mountPath: /mnt/vector-db
+  embedding:
+    local:
+      modelID: "BAAI/bge-small-en-v1.5"
+  inferenceService:
+    url: "http://workspace-phi-4-mini.default.svc.cluster.local/v1/chat/completions"
+    contextWindowSize: 4000

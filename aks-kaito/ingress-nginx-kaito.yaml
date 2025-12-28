@@ -1,0 +1,48 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: kaito-ingress
+  namespace: default
+  annotations:
+    nginx.ingress.kubernetes.io/use-regex: "true"
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+    nginx.ingress.kubernetes.io/proxy-body-size: "50m"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "300"
+spec:
+  ingressClassName: nginx
+  rules:
+    # Path-based routing with path rewriting
+    - http:
+        paths:
+          - path: /rag(/|$)(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: ragengine-example
+                port:
+                  number: 80
+          - path: /phi4(/|$)(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: workspace-phi-4-mini
+                port:
+                  number: 80
+          - path: /chat(/|$)(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: kaitochatdemo
+                port:
+                  number: 80
+          # Streamlit-based UIs may call absolute paths like /_stcore/*.
+          # This catch-all keeps /rag and /phi4 working (they're above), while
+          # ensuring those absolute paths still reach the chat service.
+          - path: /()(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: kaitochatdemo
+                port:
+                  number: 80

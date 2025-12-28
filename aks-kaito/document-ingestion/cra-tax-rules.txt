@@ -1,0 +1,122 @@
+CRA (Canada) – common tax topics/rules to check for a married couple (wife + husband) with 2 children (up to tax year 2025)
+NOTE: High-level checklist for common CRA rules/topics. Not exhaustive and not tax advice. Eligibility, forms, line numbers, and amounts can change by tax year and province/territory—verify on Canada.ca (CRA).
+
+A) Tax-year timing (relevant through 2025)
+- “Tax year 2025” return is generally filed in spring 2026 (common deadline: April 30; self-employed filing deadline commonly June 15, but any balance is commonly due April 30). Confirm deadlines for the specific year on Canada.ca.
+- Many benefits are income-tested and are recalculated annually using the prior-year return(s). File both spouses’ returns on time to avoid benefit interruptions.
+
+B) Filing basics (T1 Income Tax and Benefit Return)
+- Each spouse files their own return every year (even if one spouse has no income).
+- Report worldwide income if you are a Canadian tax resident.
+- Keep receipts/supporting documents; CRA may request them later.
+- Use direct deposit + CRA My Account for notices, slips, and benefit status.
+
+C) Marital/common-law status and household information
+- Keep CRA updated on marital status changes and the date of change (affects benefits/credits).
+- Report net income for each spouse correctly; many credits/benefits are income-tested on family net income.
+- Decide who will claim certain amounts where only one spouse can claim, or where it’s optimal to transfer.
+
+D) Children-related benefits/claims (2 kids)
+1) Canada Child Benefit (CCB)
+- Eligibility depends on residency, child’s age, and who is primarily responsible for the child’s care.
+- Shared custody rules can change payment amounts (often split/adjusted).
+- CRA may request proof of custody/residency/primary caregiver status.
+- CCB payments are typically calculated on “adjusted family net income” from filed returns (both spouses).
+
+2) Child care expenses deduction (common family item)
+- Usually claimed by the lower-income spouse/partner, subject to CRA exceptions.
+- Only eligible child care costs count; keep receipts with provider details.
+
+3) Disability-related (if applicable)
+- Disability Tax Credit (DTC) eligibility can unlock other items (e.g., Child Disability Benefit, certain credits, RDSP planning).
+- DTC is approval-based; keep medical forms/supporting documents.
+
+4) Medical expenses (family pooling)
+- Medical expenses for children can typically be pooled and claimed by one spouse.
+- Choose the best 12-month period ending in the tax year.
+
+5) Education/tuition (when kids are older)
+- Tuition amounts are generally claimed by the student; limited transfers may be available under CRA rules.
+
+E) Other income-tested credits/benefits commonly tied to family net income
+- GST/HST credit: depends on residency and family net income; filing triggers eligibility.
+- Provincial/territorial benefits (e.g., sales-tax credits, climate-related programs): vary by province/territory and may require filing + up-to-date marital/child info.
+
+F) Spousal/partner-related credits and transfers (common planning areas)
+- Spousal amount (non-refundable credit) may apply if one spouse has low income.
+- Some unused credits/amounts may be transferable between spouses (where CRA permits).
+- Pension income splitting may apply for eligible pension income (often relevant later in life).
+
+G) Registered plans & savings commonly used by families (rules to check)
+- RRSP: deduction based on contribution room (see Notice of Assessment / CRA My Account).
+- Spousal RRSP: contributor may deduct; attribution rules can apply on withdrawals within prescribed time windows.
+- RESP (kids): contributions aren’t deductible, but grants/incentives may apply; growth is tax-sheltered; withdrawals generally taxed to the student.
+- FHSA (if saving for first home): has eligibility and contribution/deduction rules; coordinate between spouses.
+
+H) Deductions commonly relevant for families
+- Moving expenses (only if CRA eligibility conditions are met).
+- Employment expenses (only if CRA conditions are met and required forms/support exist).
+- Support payments (spousal/child support): tax treatment is agreement/order-specific—follow CRA rules exactly.
+
+I) Credits commonly claimed by households (non-exhaustive)
+- Basic personal amount (each spouse).
+- Canada employment amount (if employed).
+- Medical expenses (eligible items only).
+- Charitable donations: can often be pooled on one spouse’s return for best result; keep official receipts.
+- Home renovation-related credits (only if eligible and receipts meet CRA requirements).
+
+J) Property/home and family situations (common CRA rule areas)
+- Principal residence: reporting rules can apply when you dispose of a home; keep acquisition/improvement records.
+- Renting out part/all of a home: income reporting + expense rules; capital cost allowance (CCA) can affect future principal residence treatment.
+- Attribution rules: certain income/capital gains may attribute back to a spouse if assets were transferred/loaned without meeting CRA conditions.
+- Interest deductibility is rule-driven; keep documentation if claiming.
+
+K) Common “avoid mistakes” items (CRA frequently checks)
+- SIN accuracy for each spouse (and for benefits where required).
+- Match slips (T4, T5, T3, RRSP receipts, etc.) to what CRA has on file.
+- Shared custody documentation (if applicable).
+- Ensure the correct spouse claims child care expenses and why.
+- Avoid double-claiming items that can only be claimed once per family.
+
+L) Where to verify (official CRA sources)
+- CRA My Account: notices of assessment, RRSP room, benefit status.
+- Canada Child Benefit (CCB): Canada.ca → “Canada Child Benefit”.
+- Child care expenses: Canada.ca/CRA guidance on “child care expenses”.
+- Medical expenses: CRA “eligible medical expenses” list.
+- Credits/deductions index: Canada.ca → “Tax credits and deductions”.
+- Principal residence: CRA guidance on reporting the sale/disposition of a principal residence.
+
+
+M) Ontario (ON) – province-specific items to check (up to tax year 2025)
+
+1) Ontario forms/schedules you’ll typically see
+- Ontario provincial tax/credits are generally calculated on Form ON428 (and related worksheets).
+- Benefits like the Ontario Trillium Benefit are typically handled via the ON-BEN application/schedule (filed with the return).
+
+2) Ontario Trillium Benefit (OTB) (common for families)
+OTB can include (eligibility/amount varies):
+- Ontario Sales Tax Credit (OSTC)
+- Ontario Energy and Property Tax Credit (OEPTC)
+- Northern Ontario Energy Credit (NOEC) (only if you qualify)
+Practical checklist items:
+- Keep/confirm details of Ontario rent paid (landlord name/address), or property taxes paid, and principal residence occupancy periods.
+- Keep move-in/move-out dates if you changed addresses during the year (can affect proration/eligibility).
+
+3) Ontario Childcare Access and Relief from Expenses (CARE) tax credit (if you paid eligible childcare)
+- Ontario has a refundable childcare tax credit (separate from the federal “child care expenses” deduction).
+- Eligibility/amount is income-tested and depends on eligible childcare expenses and the child’s age.
+- Keep childcare receipts (provider info, dates, amounts) because both the federal deduction and Ontario credit rely on eligible expenses rules.
+
+4) Ontario Health Premium (income-based)
+- Ontario has an income-based health premium included in the provincial tax calculation (not tied to OHIP usage).
+- Verify the calculation when one spouse has a higher income or when income includes large one-time items (e.g., bonuses, certain investment income).
+
+5) Ontario-specific notes that often surprise people
+- Ontario tuition/education amounts are generally not available as provincial credits for recent years; don’t expect an Ontario carryforward the way federal tuition can work (where applicable).
+- Some provincial and benefit programs are very sensitive to marital status and address changes—update CRA promptly to avoid benefit interruptions/adjustments.
+
+Where to verify (official sources to search on Canada.ca / Ontario)
+- “Ontario Trillium Benefit (OTB)”
+- “Ontario CARE tax credit”
+- “Ontario Health Premium”
+- CRA: “Child care expenses deduction” (federal) and Ontario’s CARE credit pages for how they interact

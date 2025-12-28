@@ -1,0 +1,8 @@
+[project]
+name = "ragengine-document-ingestion"
+version = "0.1.0"
+description = "Ingest a .txt file into RagEngine over HTTP"
+requires-python = ">=3.10"
+dependencies = [
+  "requests>=2.31.0",
+]
