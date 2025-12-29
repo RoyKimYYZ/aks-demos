@@ -52,8 +52,8 @@ curl -sS "http://$INGRESS_IP/phi4/v1/chat/completions" \
     "model": "phi-4-mini-instruct",
     "messages": [
       {"role": "system", "content": "You are a helpful assistant."},
-      {"role": "user", "content": "Hello! Briefly introduce yourself. What is KAITO for AKS?"}
+      {"role": "user", "content": "What are income tax brackets for Ontario residents in 2024?"}
     ],
     "temperature": 0.2,
-    "max_tokens": 256
+    "max_tokens": 1024
   }' | jq -C '.choices[0].message.content'

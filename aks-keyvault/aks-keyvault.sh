@@ -160,13 +160,14 @@ spec:
 EOF
 
 podname=$(kubectl get pods | grep busybox | awk '{print $1}')
+podname=busybox-deployment-secrets-store-inline-uami-5d49c57444-54cd7
 echo $podname
 ## show secrets held in secrets-store
 kubectl exec $podname -n $keyVaultDemoNamespace -- ls /mnt/secrets-store/ 
 ## print a test secret 'ExampleSecret' held in secrets-store
 kubectl exec $podname -n $keyVaultDemoNamespace -- cat /mnt/secrets-store/ExampleSecret; echo
 ## Display the environment variables that includes the secret
-kubectl exec busybox-secrets-store-inline-uami -n $keyVaultDemoNamespace -- printenv
+kubectl exec $podname -n $keyVaultDemoNamespace -- printenv
 kubectl exec busybox-secrets-store-inline-uami -n $keyVaultDemoNamespace -- env $EXAMPLE_SECRET
 
 

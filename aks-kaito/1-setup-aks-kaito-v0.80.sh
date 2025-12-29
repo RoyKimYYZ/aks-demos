@@ -96,8 +96,6 @@ az identity federated-credential create \
 # Ensure the Managed Identity has permissions to create agent pools
 AKS_ID=$(az aks show -g "$RESOURCE_GROUP" -n "$CLUSTER_NAME" --query id -o tsv)
 echo "AKS Cluster ID: $AKS_ID"
-az role assignment create --assignee "$IDENTITY_PRINCIPAL_ID" --role "Contributor" --scope "$AKS_ID" --only-show-errors || true
-echo "Assigned Contributor role to Managed Identity on AKS Cluster."
 
 # Restart GPU provisioner to pick up credentials/permissions
 kubectl rollout restart deploy/gpu-provisioner -n gpu-provisioner || true
@@ -115,7 +113,9 @@ kubectl describe deploy gpu-provisioner -n gpu-provisioner
 kubectl get pods -n gpu-provisioner
 kubectl logs --selector=app.kubernetes.io/name=gpu-provisioner -n gpu-provisioner
 
+# Deploy a KAITO Workspace with GPU (phi-4-mini)
 kubectl apply -f phi-4-workspace.yaml
+
 # kubectl delete -f phi-4-workspace.yaml
 
 # verify 

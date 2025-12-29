@@ -3,7 +3,7 @@ kind: Workspace
 metadata:
   name: workspace-phi-4-mini
 resource:
-  instanceType: "Standard_NC6s_v3" # "Standard_NC8as_T4_v3" #   # Will trigger node creation
+  instanceType: "Standard_NC6s_v3" #  # Will trigger node creation
   labelSelector:
     matchLabels:
       apps: phi-4-mini
