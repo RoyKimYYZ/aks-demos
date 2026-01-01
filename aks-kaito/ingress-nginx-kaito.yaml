@@ -15,6 +15,13 @@ spec:
     # Path-based routing with path rewriting
     - http:
         paths:
+          - path: /chat(/|$)(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: kaitochatdemo
+                port:
+                  number: 80
           - path: /rag(/|$)(.*)
             pathType: ImplementationSpecific
             backend:
@@ -29,13 +36,7 @@ spec:
                 name: workspace-phi-4-mini
                 port:
                   number: 80
-          - path: /chat(/|$)(.*)
-            pathType: ImplementationSpecific
-            backend:
-              service:
-                name: kaitochatdemo
-                port:
-                  number: 80
+          
           # Streamlit-based UIs may call absolute paths like /_stcore/*.
           # This catch-all keeps /rag and /phi4 working (they're above), while
           # ensuring those absolute paths still reach the chat service.
