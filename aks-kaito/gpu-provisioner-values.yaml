@@ -18,5 +18,5 @@ controller:
     - name: E2E_TEST_MODE
       value: "false"
 workloadIdentity:
-  clientId: be62487a-5e31-4be3-bd06-d2f47b629729
+  clientId: 51d17879-600f-4427-abf9-58adb04c3252
   tenantId: d4697920-75d5-4b07-bdbb-ca7abb88444d

@@ -26,6 +26,8 @@ az aks show -g aks-solution -n rkaksdev --query fqdn -o tsv
 # Deploy BGE Small RAGEngine that uses the BGE Small model for RAG
 kubectl apply -f bge-small-ragengine.yaml
 
+# cleanup option: kubectl delete -f bge-small-ragengine.yaml
+
 # Verify deployment of the RAGEngine
 kubectl get pods -n kaito-ragengine -o wide
 
@@ -44,8 +46,11 @@ kubectl describe deploy ragengine-example -n default
 
 kubectl apply -f pvc-ragengine-vector-db.yaml
 
+# option: kubectl delete -f pvc-ragengine-vector-db.yaml
+
 # verify PVC creation persistentvolumeclaim/pvc-ragengine-vector-db 
 kubectl get pvc -n default
+kubectl describe deploy kaito-ragengine -n kaito-ragengine
 
 # Verify ragengine.kaito.sh/ragengine-with-storage
 kubectl get ragengine -n default -o yaml | grep -A 5 "storage:" 

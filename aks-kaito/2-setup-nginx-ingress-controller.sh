@@ -39,7 +39,6 @@ echo "INGRESS_IP: $INGRESS_IP"
 curl -sS -o /dev/null -w "healthz status: %{http_code}\n" "http://$INGRESS_IP/healthz"
 
 
-
 # Test endpoint via ingress after setting up nginx ingress controller
 # Ingress endpoint (single public IP)
 INGRESS_IP=$(kubectl get ingress kaito-ingress -n default -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
@@ -52,7 +51,7 @@ curl -sS "http://$INGRESS_IP/phi4/v1/chat/completions" \
     "model": "phi-4-mini-instruct",
     "messages": [
       {"role": "system", "content": "You are a helpful assistant."},
-      {"role": "user", "content": "What are income tax brackets for Ontario residents in 2024?"}
+      {"role": "user", "content": "What are income tax brackets for Ontario residents in 2023?"}
     ],
     "temperature": 0.2,
     "max_tokens": 1024

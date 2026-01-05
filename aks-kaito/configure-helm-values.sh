@@ -24,9 +24,7 @@ AZURE_TENANT_ID=$(az account show -o json |jq -r ".tenantId")
 AZURE_SUBSCRIPTION_ID=$(az account show -o json |jq -r ".id")
 
 GPU_PROVISIONER_USER_ASSIGNED_CLIENT_ID=$(az identity show --resource-group "${AZURE_RESOURCE_GROUP}" --name "${AZURE_GPU_PROVISIONER_USER_ASSIGNED_IDENTITY_NAME}" --query 'clientId' -otsv)
-echo "Found GPU Provisioner User Assigned Identity Client ID: $GPU_PROVISIONER_USER_ASSIGNED_CLIENT_ID"
 
-# Export variables for envsubst
 export CLUSTER_NAME AZURE_LOCATION AZURE_RESOURCE_GROUP AZURE_RESOURCE_GROUP_MC GPU_PROVISIONER_USER_ASSIGNED_CLIENT_ID AZURE_TENANT_ID AZURE_SUBSCRIPTION_ID
 
 # get gpu-provisioner-values-template.yaml, if not already present (e.g. outside of repo context)

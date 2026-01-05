@@ -93,6 +93,9 @@ az identity federated-credential create \
   --audience api://AzureADTokenExchange \
   --subscription $SUBSCRIPTION
 
+# Kubernetes Service Account for the GPU provisioner
+kubectl get sa gpu-provisioner -n gpu-provisioner -o yaml
+
 # Ensure the Managed Identity has permissions to create agent pools
 AKS_ID=$(az aks show -g "$RESOURCE_GROUP" -n "$CLUSTER_NAME" --query id -o tsv)
 echo "AKS Cluster ID: $AKS_ID"
@@ -138,17 +141,32 @@ kubectl get pods -n default -o wide
 kubectl port-forward -n default svc/workspace-phi-4-mini 8080:80
 
 # Test Workspace inference via port-forwarding in another terminal
-curl -sS "http://localhost:8080/phi4/v1/chat/completions" \
+curl -sS "http://localhost:8080/v1/chat/completions" \
   -H "Content-Type: application/json" \
   -d '{
     "model": "phi-4-mini-instruct",
     "messages": [
       {"role": "system", "content": "You are a helpful assistant."},
-      {"role": "user", "content": "Hello! Briefly introduce yourself. What is KAITO for AKS?"}
+      {"role": "user", "content": "Hello! Briefly introduce yourself. What are some healthy meals with 600 calories?"}
     ],
     "temperature": 0.2,
     "max_tokens": 256
   }' | jq -C '.choices[0].message.content'
+
+
+  
+curl -sS "http://localhost:8080/v1/chat/completions" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "phi-4-mini-instruct",
+    "messages": [
+      {"role": "system", "content": "You are a helpful assistant."},
+      {"role": "user", "content": "Hello! Briefly introduce yourself. What is the population of Canada?"}
+    ],
+    "temperature": 0.2,
+    "max_tokens": 256
+  }' | jq -C '.choices[0].message.content'
+
 
 
 # Test RAGEngine route via ingress (/rag)

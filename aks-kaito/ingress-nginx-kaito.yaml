@@ -26,7 +26,7 @@ spec:
             pathType: ImplementationSpecific
             backend:
               service:
-                name: ragengine-example
+                name: ragengine-with-storage
                 port:
                   number: 80
           - path: /phi4(/|$)(.*)
