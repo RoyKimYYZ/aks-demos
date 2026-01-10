@@ -1,0 +1,10 @@
+# Legacy file (kept for compatibility).
+# Preferred: use pyproject.toml with uv:
+#   uv venv .venv
+#   uv sync --extra dev
+
+streamlit>=1.31
+requests>=2.31
+pyyaml>=6.0.1
+types-PyYAML
+types-requests

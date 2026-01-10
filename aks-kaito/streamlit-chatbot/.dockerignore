@@ -1,0 +1,9 @@
+.venv/
+__pycache__/
+*.pyc
+.mypy_cache/
+.ruff_cache/
+.streamlit/secrets.toml
+.git/
+.gitignore
+uv.lock

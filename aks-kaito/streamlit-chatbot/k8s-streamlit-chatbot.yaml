@@ -1,0 +1,135 @@
+# Deploy the Streamlit chatbot to AKS.
+#
+# Usage:
+# 1) Build & push image (example):
+#    docker build -t <ACR>.azurecr.io/kaito-streamlit-chatbot:0.1.0 .
+#    docker push <ACR>.azurecr.io/kaito-streamlit-chatbot:0.1.0
+# 2) Edit the image below.
+# 3) kubectl apply -f k8s-streamlit-chatbot.yaml
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: streamlit-chatbot-catalog
+  namespace: default
+data:
+  kaito_catalog.yaml: |
+    # Catalog mounted into the pod at /app/kaito_catalog.yaml
+    # You can set KAITO_INGRESS_BASE to point at the ingress public IP.
+    apis:
+      - name: "Phi-4 (Ingress /phi4)"
+        base_url: "${KAITO_INGRESS_BASE:-http://<INGRESS_IP>}"
+        chat_completions_path: "/phi4/v1/chat/completions"
+        models:
+          - "phi-4-mini-instruct"
+
+      - name: "RAGEngine (Ingress /rag)"
+        base_url: "${KAITO_INGRESS_BASE:-http://<INGRESS_IP>}"
+        chat_completions_path: "/rag/v1/chat/completions"
+        models:
+          - "phi-4-mini-instruct"
+        extra_payload_defaults:
+          index_name: "rag_index"
+          context_token_ratio: 0.5
+
+      - name: "Phi-4 (In-cluster DNS)"
+        base_url: "http://workspace-phi-4-mini.default.svc.cluster.local"
+        chat_completions_path: "/v1/chat/completions"
+        models:
+          - "phi-4-mini-instruct"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: streamlit-chatbot
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: streamlit-chatbot
+  template:
+    metadata:
+      labels:
+        app: streamlit-chatbot
+    spec:
+      containers:
+        - name: streamlit-chatbot
+          image: <ACR>.azurecr.io/kaito-streamlit-chatbot:0.1.0
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8501
+          env:
+            # Use a path prefix when exposing via ingress at /chatbot.
+            - name: BASE_URL_PATH
+              value: "chatbot"
+
+            # Point the app at the mounted catalog.
+            - name: KAITO_CATALOG_PATH
+              value: "/app/kaito_catalog.yaml"
+
+            # If you want the catalog's ingress entries to work from inside the cluster,
+            # set this to your ingress public IP or hostname.
+            # - name: KAITO_INGRESS_BASE
+            #   value: "http://4.229.142.8"
+          volumeMounts:
+            - name: catalog
+              mountPath: /app/kaito_catalog.yaml
+              subPath: kaito_catalog.yaml
+          readinessProbe:
+            httpGet:
+              # Streamlit health endpoint (with baseUrlPath prefix)
+              path: /chatbot/_stcore/health
+              port: 8501
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 2
+          livenessProbe:
+            httpGet:
+              path: /chatbot/_stcore/health
+              port: 8501
+            initialDelaySeconds: 30
+            periodSeconds: 20
+            timeoutSeconds: 2
+      volumes:
+        - name: catalog
+          configMap:
+            name: streamlit-chatbot-catalog
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: streamlit-chatbot
+  namespace: default
+spec:
+  type: ClusterIP
+  selector:
+    app: streamlit-chatbot
+  ports:
+    - name: http
+      port: 80
+      targetPort: 8501
+---
+# Optional: expose via nginx ingress controller at /chatbot
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: streamlit-chatbot
+  namespace: default
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "300"
+    nginx.ingress.kubernetes.io/proxy-body-size: "50m"
+spec:
+  ingressClassName: nginx
+  rules:
+    - http:
+        paths:
+          - path: /chatbot
+            pathType: Prefix
+            backend:
+              service:
+                name: streamlit-chatbot
+                port:
+                  number: 80

@@ -1,0 +1,35 @@
+# KAITO endpoint + model catalog for the Streamlit chatbot.
+#
+# Tips:
+# - For ingress, set KAITO_INGRESS_BASE (e.g. http://4.229.142.8)
+# - For port-forward, run: kubectl port-forward -n default svc/workspace-phi-4-mini 8080:80
+#
+# You can also point the app at another catalog via KAITO_CATALOG_PATH.
+
+apis:
+  - name: "Phi-4 (Ingress /phi4)"
+    base_url: "${KAITO_INGRESS_BASE:-http://<INGRESS_IP>}"
+    chat_completions_path: "/phi4/v1/chat/completions"
+    models:
+      - "phi-4-mini-instruct"
+
+  - name: "RAGEngine (Ingress /rag)"
+    base_url: "${KAITO_INGRESS_BASE:-http://<INGRESS_IP>}"
+    chat_completions_path: "/rag/v1/chat/completions"
+    models:
+      - "phi-4-mini-instruct"
+    extra_payload_defaults:
+      index_name: "rag_index"
+      context_token_ratio: 0.5
+
+  - name: "Phi-4 (Port-forward localhost:8080)"
+    base_url: "http://localhost:8080"
+    chat_completions_path: "/v1/chat/completions"
+    models:
+      - "phi-4-mini-instruct"
+
+  - name: "Phi-4 (In-cluster DNS)"
+    base_url: "http://workspace-phi-4-mini.default.svc.cluster.local"
+    chat_completions_path: "/v1/chat/completions"
+    models:
+      - "phi-4-mini-instruct"

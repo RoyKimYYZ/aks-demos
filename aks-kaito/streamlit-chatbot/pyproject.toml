@@ -1,0 +1,70 @@
+# Ruff is configured at a **moderate-to-high strictness** level, focused on common correctness and modernization issues, but with a couple of pragmatic relaxations.
+# - **Rule sets enabled (`select = ["E", "F", "I", "B", "UP"]`):**
+#    - **E**: Pycodestyle “error” checks (basic style/format issues)
+#    - **F**: Pyflakes (unused imports/variables, undefined names — real correctness signals)
+#    - **I**: Import sorting (isort-like)
+#    - **B**: Bugbear (likely-bug patterns and footguns)
+#    - **UP**: Pyupgrade (encourages modern Python syntax for `py311`)
+# - **Relaxations (`ignore = ["E501"]`):**
+#    - **E501 (line length)** is ignored, so Ruff won’t report long lines even though `line-length = 100` is set (that value mostly affects formatters/other tools, not linting in this config).
+# - **Python version strictness (`target-version = "py311"`):**
+#    - Makes **UP** rules more aggressive about modernizing code, since Python 3.11 features are assumed available.
+# Overall: **good correctness coverage (F, B) + modernization (UP) + import hygiene (I)**, but **not maximally strict** (many other Ruff families like security, complexity, type-related, docstring rules, etc. are not enabled).
+
+[project]
+name = "kaito-streamlit-chatbot"
+version = "0.1.0"
+description = "Streamlit chatbot UI for KAITO (OpenAI-compatible Chat Completions)."
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+	"streamlit>=1.31",
+	"requests>=2.31",
+	"PyYAML>=6.0.1",
+]
+
+[project.optional-dependencies]
+dev = [
+	"ruff",
+	"mypy",
+	"types-PyYAML",
+	"types-requests",
+]
+
+[build-system]
+requires = ["hatchling>=1.24"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build]
+# This repo is an app (not a library). We keep packaging minimal.
+include = [
+	"app.py",
+	"catalog.py",
+	"kaito_openai_compat.py",
+	"kaito_catalog.yaml",
+	".streamlit/config.toml",
+	"README.md",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP"]
+ignore = ["E501"]
+
+[tool.mypy]
+pretty = true
+show_error_codes = true
+warn_unused_ignores = true
+warn_redundant_casts = true
+warn_unused_configs = true
+no_implicit_optional = true
+check_untyped_defs = true
+
+install_types = true
+non_interactive = true
+
+# Streamlit + some k8s demo environments can be inconsistent; keep this pragmatic.
+ignore_missing_imports = true
