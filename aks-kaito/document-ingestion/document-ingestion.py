@@ -28,7 +28,6 @@ Notes:
 
 from __future__ import annotations
 
-import argparse
 import datetime as dt
 import hashlib
 import os
@@ -37,6 +36,12 @@ import time
 import uuid
 from typing import List, Dict, Any, Iterable, Tuple
 from urllib.parse import urljoin
+
+try:
+    import click  # type: ignore
+except ImportError:
+    print("Missing dependency: click. Install with: python3 -m pip install click", file=sys.stderr)
+    raise
 
 try:
     import requests  # type: ignore
@@ -212,206 +217,25 @@ def build_documents(
     return docs
 
 
-def main() -> int:
-    ap = argparse.ArgumentParser(description="Ingest a .txt file into RagEngine.")
-    ap.add_argument("--file", help="Path to .txt file (required for create/update)")
-    ap.add_argument("--index", required=True, help="Index name (e.g., rag_index)")
-    ap.add_argument(
-        "--mode",
-        choices=["create", "update", "list", "chat", "query"],
-        default="create",
-        help=(
-            "create: POST /rag/index (create index + add docs). "
-            "update: POST /indexes/{index}/documents. "
-            "list: GET /indexes/{index}/documents. "
-            "chat/query: POST /v1/chat/completions (OpenAI-compatible)"
-        ),
-    )
-    ap.add_argument(
-        "--base-url",
-        default=None,
-        help='Base URL to RagEngine (e.g., "http://1.2.3.4"). If omitted, uses $RAGENGINE_URL or http://$INGRESS_IP',
-    )
-    ap.add_argument("--max-chars", type=int, default=3000, help="Max characters per chunk")
-    ap.add_argument("--overlap-chars", type=int, default=200, help="Overlap characters between chunks")
-    ap.add_argument("--limit", type=int, default=10, help="List mode: max docs to return (default 10, max 100)")
-    ap.add_argument("--offset", type=int, default=0, help="List mode: offset (default 0)")
-    ap.add_argument(
-        "--max-text-length",
-        type=int,
-        default=1000,
-        help="List mode: max text length returned per doc (default 1000)",
-    )
-    ap.add_argument(
-        "--metadata-filter",
-        default=None,
-        help='List mode: JSON string to filter by metadata, e.g. {"author":"kaito"}',
-    )
-
-    ap.add_argument("--question", default=None, help="Chat mode: user question/prompt")
-    ap.add_argument("--question-file", default=None, help="Chat mode: read question from a text file")
-    ap.add_argument(
-        "--system",
-        default="You are a helpful assistant.",
-        help="Chat mode: system message (optional)",
-    )
-    ap.add_argument(
-        "--model",
-        default=None,
-        help=(
-            "Chat mode: model identifier (compatibility field). "
-            "If omitted, uses $RAGENGINE_MODEL, else 'example_model'."
-        ),
-    )
-    ap.add_argument(
-        "--temperature",
-        type=float,
-        default=0.7,
-        help="Chat mode: sampling temperature (0.0 to 1.0)",
-    )
-    ap.add_argument(
-        "--max-tokens",
-        type=int,
-        default=2048,
-        help="Chat mode: max tokens to generate",
-    )
-    ap.add_argument(
-        "--context-token-ratio",
-        type=float,
-        default=0.5,
-        help="Chat mode: percentage of context tokens reserved for RAG documents",
-    )
-    ap.add_argument(
-        "--json",
-        action="store_true",
-        help="Chat mode: print full JSON response (otherwise prints just assistant text)",
-    )
-    ap.add_argument(
-        "--show-sources",
-        action="store_true",
-        help="Chat mode: include source_nodes (if returned) in output",
-    )
-    ap.add_argument("--timeout", type=int, default=60, help="HTTP timeout seconds")
-    ap.add_argument("--retries", type=int, default=3, help="HTTP retries")
-
-    args = ap.parse_args()
-
-    if args.mode in {"create", "update"}:
-        if not args.file:
-            print("--file is required for create/update.", file=sys.stderr)
-            return 2
-        if not os.path.isfile(args.file):
-            print(f"File not found: {args.file}", file=sys.stderr)
-            return 2
-
-    base_url = args.base_url or os.environ.get("RAGENGINE_URL")
-    if not base_url:
+def _resolve_base_url(base_url: str | None) -> str:
+    base_url_eff = base_url or os.environ.get("RAGENGINE_URL")
+    if not base_url_eff:
         ingress_ip = os.environ.get("INGRESS_IP")
         if not ingress_ip:
-            print(
-                "Missing base URL. Provide --base-url or set $RAGENGINE_URL, or set $INGRESS_IP.",
-                file=sys.stderr,
+            raise click.ClickException(
+                "Missing base URL. Provide --base-url or set $RAGENGINE_URL, or set $INGRESS_IP."
             )
-            return 2
-        base_url = f"http://{ingress_ip}"
+        base_url_eff = f"http://{ingress_ip}"
 
-    # Ensure trailing slash for urljoin behavior
-    if not base_url.endswith("/"):
-        base_url += "/"
+    if not base_url_eff.endswith("/"):
+        base_url_eff += "/"
+    return base_url_eff
 
-    if args.mode == "list":
-        endpoint = urljoin(base_url, f"indexes/{args.index}/documents")
-        params: Dict[str, Any] = {
-            "limit": args.limit,
-            "offset": args.offset,
-            "max_text_length": args.max_text_length,
-        }
-        if args.metadata_filter:
-            try:
-                params["metadata_filter"] = _parse_metadata_filter(args.metadata_filter)
-            except Exception as e:
-                print(f"Invalid --metadata-filter JSON: {e}", file=sys.stderr)
-                return 2
-        result = request_json_with_retries(
-            "GET",
-            endpoint,
-            params=params,
-            timeout_s=args.timeout,
-            retries=args.retries,
-        )
-    elif args.mode in {"chat", "query"}:
-        question = args.question
-        if args.question_file:
-            try:
-                question = _read_text_file(args.question_file).strip()
-            except Exception as e:
-                print(f"Failed to read --question-file: {e}", file=sys.stderr)
-                return 2
-        if not question:
-            print("Chat mode requires --question or --question-file.", file=sys.stderr)
-            return 2
 
-        model_name = args.model or os.environ.get("RAGENGINE_MODEL") or "example_model"
-
-        endpoint = urljoin(base_url, "v1/chat/completions")
-        payload = {
-            "index_name": args.index,
-            "model": model_name,
-            "messages": [
-                {"role": "system", "content": args.system},
-                {"role": "user", "content": question},
-            ],
-            "temperature": args.temperature,
-            "max_tokens": args.max_tokens,
-            "context_token_ratio": args.context_token_ratio,
-        }
-        result = request_json_with_retries(
-            "POST",
-            endpoint,
-            payload=payload,
-            timeout_s=args.timeout,
-            retries=args.retries,
-        )
-    else:
-        docs = build_documents(
-            args.file,
-            max_chars=args.max_chars,
-            overlap_chars=args.overlap_chars,
-            extra_metadata={"index_name": args.index},
-        )
-
-        if args.mode == "create":
-            endpoint = urljoin(base_url, "rag/index")
-            payload = {
-                "index_name": args.index,
-                "documents": [{"text": text, "metadata": md} for (_doc_id, text, md) in docs],
-            }
-        else:
-            endpoint = urljoin(base_url, f"indexes/{args.index}/documents")
-            payload = {
-                "documents": [
-                    {
-                        "doc_id": doc_id,
-                        "text": text,
-                        "hash_value": _sha256_hex(text),
-                        "metadata": md,
-                    }
-                    for (doc_id, text, md) in docs
-                ]
-            }
-
-        result = request_json_with_retries(
-            "POST",
-            endpoint,
-            payload=payload,
-            timeout_s=args.timeout,
-            retries=args.retries,
-        )
-
-    # Print output (no external deps)
+def _print_result(result: Dict[str, Any], *, mode: str, json_out: bool, show_sources: bool) -> None:
     import json
 
-    if args.mode in {"chat", "query"} and not args.json:
+    if mode in {"chat", "query"} and not json_out:
         text_out = ""
         try:
             choices = result.get("choices") or []
@@ -422,18 +246,204 @@ def main() -> int:
             text_out = ""
 
         if text_out:
-            print(text_out)
+            click.echo(text_out)
         else:
-            # Fallback: show full response if shape is unexpected
-            print(json.dumps(result, indent=2, sort_keys=True))
+            click.echo(json.dumps(result, indent=2, sort_keys=True))
 
-        if args.show_sources and isinstance(result, dict) and result.get("source_nodes"):
-            print("\n---\nsource_nodes:")
-            print(json.dumps(result.get("source_nodes"), indent=2, sort_keys=True))
+        if show_sources and isinstance(result, dict) and result.get("source_nodes"):
+            click.echo("\n---\nsource_nodes:")
+            click.echo(json.dumps(result.get("source_nodes"), indent=2, sort_keys=True))
     else:
-        print(json.dumps(result, indent=2, sort_keys=True))
-    return 0
+        click.echo(json.dumps(result, indent=2, sort_keys=True))
+
+
+@click.command(context_settings={"help_option_names": ["-h", "--help"]})
+@click.option("--file", "file_path", type=click.Path(exists=True, dir_okay=False), help="Path to .txt file (required for create/update)")
+@click.option("--index", required=True, help="Index name (e.g., rag_index)")
+@click.option(
+    "--mode",
+    type=click.Choice(["create", "update", "list", "chat", "query"], case_sensitive=False),
+    default="create",
+    show_default=True,
+    help=(
+        "create: POST /rag/index (create index + add docs). "
+        "update: POST /indexes/{index}/documents. "
+        "list: GET /indexes/{index}/documents. "
+        "chat/query: POST /v1/chat/completions (OpenAI-compatible)"
+    ),
+)
+@click.option(
+    "--base-url",
+    default=None,
+    envvar="RAGENGINE_URL",
+    show_envvar=True,
+    help='Base URL to RagEngine (e.g., "http://1.2.3.4/rag"). If omitted, uses $RAGENGINE_URL or http://$INGRESS_IP.',
+)
+@click.option("--max-chars", type=int, default=3000, show_default=True, help="Max characters per chunk")
+@click.option("--overlap-chars", type=int, default=200, show_default=True, help="Overlap characters between chunks")
+@click.option("--limit", type=int, default=10, show_default=True, help="List mode: max docs to return (default 10, max 100)")
+@click.option("--offset", type=int, default=0, show_default=True, help="List mode: offset (default 0)")
+@click.option(
+    "--max-text-length",
+    type=int,
+    default=1000,
+    show_default=True,
+    help="List mode: max text length returned per doc",
+)
+@click.option(
+    "--metadata-filter",
+    default=None,
+    help='List mode: JSON string to filter by metadata, e.g. {"author":"kaito"}',
+)
+@click.option("--question", default=None, help="Chat mode: user question/prompt")
+@click.option("--question-file", type=click.Path(exists=True, dir_okay=False), default=None, help="Chat mode: read question from a text file")
+@click.option("--system", default="You are a helpful assistant.", show_default=True, help="Chat mode: system message")
+@click.option(
+    "--model",
+    default=None,
+    envvar="RAGENGINE_MODEL",
+    show_envvar=True,
+    help="Chat mode: model identifier (compatibility field). If omitted, uses $RAGENGINE_MODEL, else 'example_model'.",
+)
+@click.option("--temperature", type=float, default=0.7, show_default=True, help="Chat mode: sampling temperature (0.0 to 1.0)")
+@click.option("--max-tokens", type=int, default=2048, show_default=True, help="Chat mode: max tokens to generate")
+@click.option(
+    "--context-token-ratio",
+    type=float,
+    default=0.5,
+    show_default=True,
+    help="Chat mode: percentage of context tokens reserved for RAG documents",
+)
+@click.option("--json", "json_out", is_flag=True, help="Chat mode: print full JSON response (otherwise prints just assistant text)")
+@click.option("--show-sources", is_flag=True, help="Chat mode: include source_nodes (if returned) in output")
+@click.option("--timeout", type=int, default=60, show_default=True, help="HTTP timeout seconds")
+@click.option("--retries", type=int, default=3, show_default=True, help="HTTP retries")
+def cli(
+    file_path: str | None,
+    index: str,
+    mode: str,
+    base_url: str | None,
+    max_chars: int,
+    overlap_chars: int,
+    limit: int,
+    offset: int,
+    max_text_length: int,
+    metadata_filter: str | None,
+    question: str | None,
+    question_file: str | None,
+    system: str,
+    model: str | None,
+    temperature: float,
+    max_tokens: int,
+    context_token_ratio: float,
+    json_out: bool,
+    show_sources: bool,
+    timeout: int,
+    retries: int,
+) -> None:
+    """Ingest a .txt file into RagEngine and query it via OpenAI-compatible endpoints."""
+
+    mode_l = mode.lower().strip()
+
+    if mode_l in {"create", "update"} and not file_path:
+        raise click.ClickException("--file is required for create/update.")
+
+    base_url_eff = _resolve_base_url(base_url)
+
+    if mode_l == "list":
+        endpoint = urljoin(base_url_eff, f"indexes/{index}/documents")
+        params: Dict[str, Any] = {
+            "limit": limit,
+            "offset": offset,
+            "max_text_length": max_text_length,
+        }
+        if metadata_filter:
+            try:
+                params["metadata_filter"] = _parse_metadata_filter(metadata_filter)
+            except Exception as e:
+                raise click.ClickException(f"Invalid --metadata-filter JSON: {e}")
+
+        result = request_json_with_retries(
+            "GET",
+            endpoint,
+            params=params,
+            timeout_s=timeout,
+            retries=retries,
+        )
+        _print_result(result, mode=mode_l, json_out=True, show_sources=False)
+        return
+
+    if mode_l in {"chat", "query"}:
+        q = question
+        if question_file:
+            try:
+                q = _read_text_file(question_file).strip()
+            except Exception as e:
+                raise click.ClickException(f"Failed to read --question-file: {e}")
+        if not q:
+            raise click.ClickException("Chat/query mode requires --question or --question-file.")
+
+        model_name = model or "example_model"
+        endpoint = urljoin(base_url_eff, "v1/chat/completions")
+        payload = {
+            "index_name": index,
+            "model": model_name,
+            "messages": [
+                {"role": "system", "content": system},
+                {"role": "user", "content": q},
+            ],
+            "temperature": temperature,
+            "max_tokens": max_tokens,
+            "context_token_ratio": context_token_ratio,
+        }
+        result = request_json_with_retries(
+            "POST",
+            endpoint,
+            payload=payload,
+            timeout_s=timeout,
+            retries=retries,
+        )
+        _print_result(result, mode=mode_l, json_out=json_out, show_sources=show_sources)
+        return
+
+    # create/update
+    assert file_path is not None
+    docs = build_documents(
+        file_path,
+        max_chars=max_chars,
+        overlap_chars=overlap_chars,
+        extra_metadata={"index_name": index},
+    )
+
+    if mode_l == "create":
+        endpoint = urljoin(base_url_eff, "rag/index")
+        payload = {
+            "index_name": index,
+            "documents": [{"text": text, "metadata": md} for (_doc_id, text, md) in docs],
+        }
+    else:
+        endpoint = urljoin(base_url_eff, f"indexes/{index}/documents")
+        payload = {
+            "documents": [
+                {
+                    "doc_id": doc_id,
+                    "text": text,
+                    "hash_value": _sha256_hex(text),
+                    "metadata": md,
+                }
+                for (doc_id, text, md) in docs
+            ]
+        }
+
+    result = request_json_with_retries(
+        "POST",
+        endpoint,
+        payload=payload,
+        timeout_s=timeout,
+        retries=retries,
+    )
+    _print_result(result, mode=mode_l, json_out=True, show_sources=False)
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    cli()

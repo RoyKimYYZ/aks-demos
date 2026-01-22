@@ -130,7 +130,8 @@ kubectl get pods -n default -o wide
 # Check node pools
 az aks nodepool list -g "$RESOURCE_GROUP" --cluster-name "$CLUSTER_NAME" -o table
 
-kubectl get workspace
+# expect ResourceReady true
+kubectl get workspace 
 kubectl get job -n default
 
 kubectl get workspace workspace-phi-4-mini -n default -o yaml

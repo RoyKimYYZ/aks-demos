@@ -29,6 +29,15 @@ spec:
                 name: ragengine-with-storage
                 port:
                   number: 80
+          - path: /rag-nostorage(/|$)(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                # RAGEngine Service name is created from the RAGEngine CR name.
+                # If you deploy pvc-ragengine-vector-db.yaml, switch this to: ragengine-with-storage
+                name: ragengine-example
+                port:
+                  number: 80
           - path: /phi4(/|$)(.*)
             pathType: ImplementationSpecific
             backend:

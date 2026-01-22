@@ -1,6 +1,6 @@
 # https://kaito-project.github.io/kaito/docs/rag/
 
-
+# Install RAG engine helm chart
 helm repo add kaito https://kaito-project.github.io/kaito/charts/kaito
 helm repo update
 helm upgrade --install kaito-ragengine kaito/ragengine \
@@ -26,18 +26,16 @@ az aks show -g aks-solution -n rkaksdev --query fqdn -o tsv
 # Deploy BGE Small RAGEngine that uses the BGE Small model for RAG
 kubectl apply -f bge-small-ragengine.yaml
 
-# cleanup option: kubectl delete -f bge-small-ragengine.yaml
 
 # Verify deployment of the RAGEngine
 kubectl get pods -n kaito-ragengine -o wide
 
-kubectl get workspace -A
-
+# Check 
 kubectl describe deploy ragengine-example -n default
 
-# Option: uninstall bge-small-ragengine
+# cleanup options:
 # kubectl delete -f bge-small-ragengine.yaml
-
+# helm uninstall kaito-ragengine -n kaito-ragengine
 
 # https://kaito-project.github.io/kaito/docs/rag#persistent-storage-optional
 # Create a PVC that can be used for vector DB persistence.
@@ -55,16 +53,46 @@ kubectl describe deploy kaito-ragengine -n kaito-ragengine
 # Verify ragengine.kaito.sh/ragengine-with-storage
 kubectl get ragengine -n default -o yaml | grep -A 5 "storage:" 
 
+
+# Delete Ragengine
+
+
+# Check ingress rules only
+kubectl get ingress kaito-ingress -n default -o jsonpath='{.spec.rules}' | jq .
+
+# Test endpoints via ingress
+INGRESS_IP="${INGRESS_IP:-$(kubectl get svc ingress-nginx-controller -n ingress-nginx -o jsonpath='{.status.loadBalancer.ingress[0].ip}')}"
+if [ -z "$INGRESS_IP" ]; then
+  echo "ERROR: INGRESS_IP is empty. Is ingress-nginx installed and has an external IP?" >&2
+  kubectl get svc -n ingress-nginx -o wide >&2 || true
+  exit 1
+fi
+export INGRESS_IP
+echo "INGRESS_IP=$INGRESS_IP"
+
+# Choose which ingress path to use:
+# - rag: routes to ragengine-with-storage with persistent volume DB
+# - rag-nostorage: routes to ragengine-example with no persistent volume DB
+RAG_PATH="${RAG_PATH:-rag-nostorage}"
+export RAG_PATH
+echo "RAG_PATH=$RAG_PATH"
+
 # List indexes
-curl -sS "http://$INGRESS_IP/rag/indexes" | jq
+curl -sS "http://$INGRESS_IP/$RAG_PATH/indexes" | jq
 
 
 # Create index (through ingress)
-curl -sS -X POST "http://$INGRESS_IP/rag/index" \
+curl -sS -X POST "http://$INGRESS_IP/$RAG_PATH/index" \
   -H "Content-Type: application/json" \
   -d '{
     "index_name": "rag_index",
     "documents": [
+      {
+        "text": "",
+        "metadata": {
+          "author": "Roy Kim"
+        }
+      },
       {
         "text": "Retrieval Augmented Generation (RAG) is an architecture that augments the capabilities of a Large Language Model (LLM) like ChatGPT by adding an information retrieval system that provides grounding data.",
         "metadata": {
@@ -77,7 +105,7 @@ curl -sS -X POST "http://$INGRESS_IP/rag/index" \
 
 # index code documents with split_type code
 
-RESPONSE=$(curl -sS -X POST http://$INGRESS_IP/rag/index \
+RESPONSE=$(curl -sS -X POST "http://$INGRESS_IP/$RAG_PATH/index" \
   -H "Content-Type: application/json" \
   -d '{
     "index_name": "code_index",
@@ -120,21 +148,21 @@ echo "All doc_ids:"
 echo "$ALL_DOC_IDS"
 
 # examples for listing documents:
-curl -X GET "http://$INGRESS_IP/rag/indexes/rag_index/documents?limit=5&offset=0&max_text_length=500" | jq
+curl -X GET "http://$INGRESS_IP/$RAG_PATH/indexes/rag_index/documents?limit=5&offset=0&max_text_length=500" | jq
 
-curl -X GET "http://$INGRESS_IP/rag/indexes/code_index/documents?limit=5&offset=0&max_text_length=500" | jq
+curl -X GET "http://$INGRESS_IP/$RAG_PATH/indexes/code_index/documents?limit=5&offset=0&max_text_length=500" | jq
 
 # with pagination (next 5 documents)
-curl -X GET "http://$INGRESS_IP/rag/indexes/rag_index/documents?limit=5&offset=5&max_text_length=500" | jq
+curl -X GET "http://$INGRESS_IP/$RAG_PATH/indexes/rag_index/documents?limit=5&offset=5&max_text_length=500" | jq
 
 # List all documents with full text
-curl -X GET "http://$INGRESS_IP/rag/indexes/rag_index/documents?limit=100&max_text_length=5000" | jq
+curl -X GET "http://$INGRESS_IP/$RAG_PATH/indexes/rag_index/documents?limit=100&max_text_length=5000" | jq
 
 # list available indexes
-curl -X GET "http://$INGRESS_IP/rag/indexes" | jq
+curl -X GET "http://$INGRESS_IP/$RAG_PATH/indexes" | jq
 
 # Update Document by ID
-curl -X POST "http://$INGRESS_IP/rag/indexes/code_index/documents" \
+curl -X POST "http://$INGRESS_IP/$RAG_PATH/indexes/code_index/documents" \
   -H "Content-Type: application/json" \
   -d '{
         "documents": [
@@ -143,7 +171,7 @@ curl -X POST "http://$INGRESS_IP/rag/indexes/code_index/documents" \
                 "text": "Retrieval Augmented Generation (RAG) is an architecture that augments the capabilities of a Large Language Model (LLM) like ChatGPT by adding an information retrieval system that provides grounding data. Adding an information retrieval system gives you control over grounding data used by an LLM when it formulates a response.",
                 "hash_value": "text_hash_value",
                 "metadata": {
-                    "author": "kaito"
+                  "author": "kaito",
                     "updated": "true"
                 }
             }
@@ -152,7 +180,23 @@ curl -X POST "http://$INGRESS_IP/rag/indexes/code_index/documents" \
 
 
 model=phi-4-mini-instruct
-curl -X POST http://$INGRESS_IP/rag/v1/chat/completions \
+
+curl -sS -X POST "http://$INGRESS_IP/$RAG_PATH/v1/chat/completions" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "index_name": "code_index",
+    "model": "phi-4-mini-instruct",
+    "messages": [
+      {"role": "system", "content": "You are a knowledgeable assistant."},
+      {"role": "user", "content": "What is Retrieval Augmented Generation (RAG)?"}
+    ],
+    "temperature": 0.7,
+    "max_tokens": 2048,
+    "context_token_ratio": 0.5
+  }' | jq
+  
+
+curl -X POST http://$INGRESS_IP/$RAG_PATH/v1/chat/completions \
   -H "Content-Type: application/json" \
   -d '{
         "index_name": "rag_index",
@@ -166,7 +210,6 @@ curl -X POST http://$INGRESS_IP/rag/v1/chat/completions \
         "context_token_ratio": 0.5
       }' | jq
 
-  
 
 curl -X POST http://$INGRESS_IP/phi4/v1/chat/completions \
   -H "Content-Type: application/json" \
@@ -181,4 +224,73 @@ curl -X POST http://$INGRESS_IP/phi4/v1/chat/completions \
         "max_tokens": 2048,
         "context_token_ratio": 0.5
       }' | jq
+
+
+
+
+# Demo Scenario: Index and Query Land of Fantasia laws
+# Assumes you already have INGRESS_IP + RAG_PATH set (e.g., RAG_PATH=rag-nostorage)
+DOC_FILE="document-ingestion/fantasia-citizen-laws.md"
+
+curl -sS -X POST "http://$INGRESS_IP/$RAG_PATH/index" \
+  -H "Content-Type: application/json" \
+  -d "$(jq -n \
+    --arg index_name "rag_index" \
+    --rawfile text "$DOC_FILE" \
+    --arg title "Fantasia Citizen Code (FCC)" \
+    --arg jurisdiction "Island of Fantasia (fictional)" \
+    --arg version "FCC-1.0" \
+    --arg effective_date "2041-04-01" \
+    --arg last_updated "2041-09-15" \
+    --arg intended_use "Demo document for vector database ingestion + RAG question answering" \
+    --argjson tags '["fantasia","fictional-law","citizen-code","vector-db-demo","rag"]' \
+    '{
+      index_name: $index_name,
+      documents: [
+        {
+          text: $text,
+          metadata: {
+            title: $title,
+            jurisdiction: $jurisdiction,
+            version: $version,
+            effective_date: $effective_date,
+            last_updated: $last_updated,
+            intended_use: $intended_use,
+            tags: $tags,
+            source: "fantasia-citizen-laws.md"
+          }
+        }
+      ]
+    }')" | jq
+
+
+curl -sS -X POST "http://$INGRESS_IP/$RAG_PATH/v1/chat/completions" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "index_name": "rag_index",
+    "model": "phi-4-mini-instruct",     
+    "messages": [
+      {"role": "system", "content": "You are a legal assistant knowledgeable about the laws of the Island of Fantasia."},
+      {"role": "user", "content": "What are the key responsibilities of citizens under the Fantasia Citizen Code?"}
+    ],
+    "temperature": 0.3,
+    "max_tokens": 2048,
+    "context_token_ratio": 0.6
+  }' | jq -r '.choices[0].message.content'
+# Expected: The response should summarize key responsibilities as outlined in the FCC document.
+
+
+curl -sS -X POST "http://$INGRESS_IP/$RAG_PATH/v1/chat/completions" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "index_name": "rag_index",
+    "model": "phi-4-mini-instruct",     
+    "messages": [
+      {"role": "system", "content": "You are a legal assistant knowledgeable about the laws of the Island of Fantasia."},
+      {"role": "user", "content": "What is law 1.02 Civic Ledger registration?"}
+    ],
+    "temperature": 0.9,
+    "max_tokens": 2048,
+    "context_token_ratio": 0.6
+  }' | jq -r '.choices[0].message.content'
 

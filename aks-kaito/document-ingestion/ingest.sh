@@ -27,7 +27,7 @@ if [[ ! -d "${VENV_DIR}" ]]; then
 fi
 
 # Ensure dependencies are installed inside this venv
-uv pip -p "${PY}" install -q "requests>=2.31.0"
+uv pip -p "${PY}" install -q "click>=8.1.7" "requests>=2.31.0"
 
 exec "${PY}" "${SCRIPT_DIR}/document-ingestion.py" "$@"
 

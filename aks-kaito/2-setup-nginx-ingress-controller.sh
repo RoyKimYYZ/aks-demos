@@ -29,7 +29,10 @@ kubectl get ingress -A
 # Check ingress controller service (external IP)
 kubectl get svc -n ingress-nginx -o wide
 kubectl get ingress kaito-ingress -n default -o wide
+# Check ingress rules
 kubectl describe ingress kaito-ingress -n default | head -40
+# Check ingress rules only
+kubectl get ingress kaito-ingress -n default -o jsonpath='{.spec.rules}' | jq .
 
 kubectl get svc -n ingress-nginx
 INGRESS_IP=$(kubectl get svc ingress-nginx-controller -n ingress-nginx -o jsonpath='{.status.loadBalancer.ingress[0].ip}')

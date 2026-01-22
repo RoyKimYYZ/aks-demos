@@ -4,5 +4,6 @@ version = "0.1.0"
 description = "Ingest a .txt file into RagEngine over HTTP"
 requires-python = ">=3.10"
 dependencies = [
+  "click>=8.1.7",
   "requests>=2.31.0",
 ]
