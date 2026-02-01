@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 
-# Lightweight Python image with slim OS libraries for smaller image size and attack surface. 
-FROM python:3.11-slim
+# Lightweight Python image with slim OS libraries for smaller image size and attack surface.
+FROM python:3.13-slim
 # These settings help make Python apps behave better in containers:
 #
 # - Disabling .pyc bytecode files:

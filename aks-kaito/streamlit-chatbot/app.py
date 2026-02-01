@@ -1,11 +1,12 @@
 from __future__ import annotations
 
 import json
+import os
 from typing import Any
 
 import streamlit as st
 
-from catalog import get_api_by_name, load_catalog, resolve_catalog_path
+from catalog import KaitoApi, get_api_by_name, load_catalog, resolve_catalog_path
 from kaito_openai_compat import (
     ChatCompletionError,
     chat_completions,
@@ -19,9 +20,7 @@ st.set_page_config(page_title="KAITO Chatbot", layout="wide")
 
 def _init_state() -> None:
     if "messages" not in st.session_state:
-        st.session_state.messages = [
-            {"role": "system", "content": "You are a helpful assistant."}
-        ]
+        st.session_state.messages = [{"role": "system", "content": "You are a helpful assistant."}]
 
 
 @st.cache_data(show_spinner=False)
@@ -35,14 +34,62 @@ def _sidebar_config() -> dict[str, Any]:
     catalog_path = resolve_catalog_path()
     catalog = _load_catalog_cached(catalog_path)
 
-    api_names = [a.name for a in catalog.apis]
-    default_api = st.sidebar.selectbox("API endpoint", api_names, index=0)
-    api = get_api_by_name(catalog, default_api)
-    if api is None:
-        st.sidebar.error("Selected API not found in catalog")
-        st.stop()
+    with st.sidebar.expander("Ingress quick select", expanded=True):
+        ingress_base = st.text_input(
+            "Ingress base URL",
+            value=os.environ.get("KAITO_INGRESS_BASE", ""),
+            placeholder="http://<INGRESS_IP>",
+        )
+        use_ingress = st.checkbox(
+            "Use ingress endpoint",
+            value=bool(ingress_base),
+        )
+        ingress_service = st.selectbox(
+            "Ingress service",
+            [
+                "Phi-4 (/phi4)",
+                "RAGEngine (/rag)",
+                "RAGEngine (/rag-nostorage)",
+            ],
+            index=0,
+            disabled=not use_ingress,
+        )
+
+    if use_ingress:
+        if not ingress_base.strip():
+            st.sidebar.error("Provide an ingress base URL to use ingress endpoints.")
+            st.stop()
+
+        if ingress_service.startswith("Phi-4"):
+            chat_path = "/phi4/v1/chat/completions"
+            extra_defaults: dict[str, Any] = {}
+        elif "rag-nostorage" in ingress_service:
+            chat_path = "/rag-nostorage/v1/chat/completions"
+            extra_defaults = {"index_name": "rag_index", "context_token_ratio": 0.5}
+        else:
+            chat_path = "/rag/v1/chat/completions"
+            extra_defaults = {"index_name": "rag_index", "context_token_ratio": 0.5}
+
+        api = KaitoApi(
+            name=f"Ingress: {ingress_service}",
+            base_url=ingress_base.strip(),
+            chat_completions_path=chat_path,
+            models=["phi-4-mini-instruct"],
+            extra_payload_defaults=extra_defaults,
+        )
+    else:
+        api_names = [a.name for a in catalog.apis]
+        default_api = st.sidebar.selectbox("API endpoint", api_names, index=0)
+        api = get_api_by_name(catalog, default_api)
+        if api is None:
+            st.sidebar.error("Selected API not found in catalog")
+            st.stop()
 
     st.sidebar.caption(f"Chat Completions: {api.chat_completions_url}")
+
+    is_ragengine = "/rag" in api.chat_completions_path
+    if is_ragengine:
+        st.sidebar.info("RAGEngine replies are non-streaming; streaming is disabled.")
 
     if api.models:
         model = st.sidebar.selectbox("Model", api.models, index=0)
@@ -54,7 +101,11 @@ def _sidebar_config() -> dict[str, Any]:
         max_tokens = st.number_input(
             "Max tokens", min_value=1, max_value=8192, value=512, step=1
         )
-        stream = st.checkbox("Stream", value=True)
+        stream = st.checkbox(
+            "Stream",
+            value=False if is_ragengine else True,
+            disabled=is_ragengine,
+        )
 
     with st.sidebar.expander("Auth & Advanced", expanded=False):
         api_key = st.text_input("API key (optional)", type="password")
@@ -81,10 +132,14 @@ def _sidebar_config() -> dict[str, Any]:
             st.error(f"Invalid extra JSON: {e}")
             st.stop()
 
+    if is_ragengine:
+        stream = False
+        if "stream" in extra_payload:
+            extra_payload = dict(extra_payload)
+            extra_payload.pop("stream", None)
+
     if st.sidebar.button("New chat", type="secondary"):
-        st.session_state.messages = [
-            {"role": "system", "content": "You are a helpful assistant."}
-        ]
+        st.session_state.messages = [{"role": "system", "content": "You are a helpful assistant."}]
         st.rerun()
 
     return {

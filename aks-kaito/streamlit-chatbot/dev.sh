@@ -20,7 +20,7 @@ exit 0
 
 ### 1) Setup venv + install deps
 uv --version
-uv venv .venv
+uv venv --python 3.13.0 .venv
 
 # Install deps from pyproject.toml
 uv sync --extra dev
@@ -71,10 +71,7 @@ ACR_NAME="rkimacr"
 ACR_LOGIN_SERVER="$(az acr show --name "${ACR_NAME}" --query loginServer -o tsv --subscription "Enterprise Shared Services")"
 echo "ACR Login Server: ${ACR_LOGIN_SERVER}"
 
-# If you see errors like:
-#   Error saving credentials ... docker-credential-desktop.exe not found
-# your Docker config is pointing at a Windows credential helper.
-# Workaround: use a temporary DOCKER_CONFIG so docker login doesn't try to use the broken helper.
+# Avoid docker-credential-desktop.exe errors by using a temporary DOCKER_CONFIG.
 export DOCKER_CONFIG="$(mktemp -d)"
 
 # Login using an ACR access token (no admin user required)
@@ -87,3 +84,13 @@ printf "%s" "${ACR_TOKEN}" | docker login "${ACR_LOGIN_SERVER}" \
 	--password-stdin
 
 docker push "${ACR_LOGIN_SERVER}/streamlit-chatbot:latest"
+
+
+# redeploy streamlit-chatbot in AKS to pick up the new image
+kubectl get deployments -n default
+
+kubectl apply -f k8s-streamlit-chatbot.yaml -n default
+kubectl apply -f ingress-streamlit-chatbot.yaml -n default
+
+kubectl rollout restart deployment streamlit-chatbot -n default
+kubectl get pods -n default -l app=streamlit-chatbot

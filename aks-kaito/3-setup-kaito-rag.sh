@@ -5,6 +5,13 @@ helm repo add kaito https://kaito-project.github.io/kaito/charts/kaito
 helm repo update
 helm upgrade --install kaito-ragengine kaito/ragengine \
   --namespace kaito-ragengine \
+  --create-namespace \
+  --set podSecurityContext.runAsNonRoot=false
+
+helm repo add kaito https://kaito-project.github.io/kaito/charts/kaito
+helm repo update
+helm upgrade --install kaito-ragengine kaito/ragengine \
+  --namespace kaito-ragengine \
   --create-namespace
 
 # Verify installation
@@ -12,12 +19,12 @@ helm list -n kaito-ragengine
 
 # Check pods status
 kubectl get pods -n kaito-ragengine
-kubectl describe deploy ragengine -n kaito-ragengine
+kubectl describe deploy kaito-ragengine -n kaito-ragengine
 
 kubectl get svc -n default -o wide && echo "---" && kubectl get svc -A | grep -i "phi\|workspace"
 # The service name is workspace-phi-4-mini, so the in-cluster DNS is http://workspace-phi-4-mini.default.svc.cluster.local/v1/chat/completions
 
-# Get the AKS cluster FQDN
+# Optional: Get the AKS cluster FQDN
 az aks show -g aks-solution -n rkaksdev --query fqdn -o tsv
 # Go to bge-small-ragengine.yaml and update the workspaceBaseUrl with the FQDN above
 # Update url: "http://workspace-phi-4-mini.default.svc.cluster.local/v1/chat/completions"
@@ -26,6 +33,8 @@ az aks show -g aks-solution -n rkaksdev --query fqdn -o tsv
 # Deploy BGE Small RAGEngine that uses the BGE Small model for RAG
 kubectl apply -f bge-small-ragengine.yaml
 
+# delete bge-small-ragengine
+# kubectl delete -f bge-small-ragengine.yaml
 
 # Verify deployment of the RAGEngine
 kubectl get pods -n kaito-ragengine -o wide
@@ -55,7 +64,10 @@ kubectl get ragengine -n default -o yaml | grep -A 5 "storage:"
 
 
 # Delete Ragengine
+# kubectl delete ragengine ragengine-with-storage -n default
 
+# Deploy ingress for RAGEngine
+kubectl apply -f ingress-ragengine.yaml
 
 # Check ingress rules only
 kubectl get ingress kaito-ingress -n default -o jsonpath='{.spec.rules}' | jq .
@@ -74,6 +86,7 @@ echo "INGRESS_IP=$INGRESS_IP"
 # - rag: routes to ragengine-with-storage with persistent volume DB
 # - rag-nostorage: routes to ragengine-example with no persistent volume DB
 RAG_PATH="${RAG_PATH:-rag-nostorage}"
+RAG_PATH="rag-nostorage"
 export RAG_PATH
 echo "RAG_PATH=$RAG_PATH"
 
@@ -88,13 +101,13 @@ curl -sS -X POST "http://$INGRESS_IP/$RAG_PATH/index" \
     "index_name": "rag_index",
     "documents": [
       {
-        "text": "",
+	      "text": "Northwind Research Cloud Handbook (Fictional) v2.3 (2026-01-15). Product: Beacon real-time analytics for IoT telemetry. Default retention: raw telemetry 30 days, aggregated metrics 400 days, alert history 180 days. Security rules: encryption at rest AES-256 and in transit TLS 1.2+. Service-to-service tokens must be short-lived with max TTL 60 minutes. Incident comms cadence: SEV-0 updates every 15 minutes, SEV-1 every 30 minutes. API limits (per tenant, production): Query API 300 requests/min with burst up to 2x for 90 seconds. Query constraints: max query window 31 days, max rows 50000, timeout 20 seconds.",
         "metadata": {
           "author": "Roy Kim"
         }
       },
       {
-        "text": "Retrieval Augmented Generation (RAG) is an architecture that augments the capabilities of a Large Language Model (LLM) like ChatGPT by adding an information retrieval system that provides grounding data.",
+        "text": "Retrieval Augmented Generation (RAG) is an architecture that augments the capabilities of a Large Language Model (LLM) by adding an information retrieval system that provides grounding data.",
         "metadata": {
           "author": "kaito"
         }
@@ -184,13 +197,13 @@ model=phi-4-mini-instruct
 curl -sS -X POST "http://$INGRESS_IP/$RAG_PATH/v1/chat/completions" \
   -H "Content-Type: application/json" \
   -d '{
-    "index_name": "code_index",
+    "index_name": "rag_index",
     "model": "phi-4-mini-instruct",
     "messages": [
       {"role": "system", "content": "You are a knowledgeable assistant."},
-      {"role": "user", "content": "What is Retrieval Augmented Generation (RAG)?"}
+      {"role": "user", "content": "What is the default retention for raw telemetry vs aggregated metrics vs alert history? Give the numbers and units."}
     ],
-    "temperature": 0.7,
+    "temperature": 0.5,
     "max_tokens": 2048,
     "context_token_ratio": 0.5
   }' | jq

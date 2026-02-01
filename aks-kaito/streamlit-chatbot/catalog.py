@@ -64,13 +64,9 @@ def load_catalog(path: str) -> KaitoCatalog:
             KaitoApi(
                 name=str(raw.get("name", "Unnamed API")),
                 base_url=str(raw.get("base_url", "")).strip(),
-                chat_completions_path=str(
-                    raw.get("chat_completions_path", "/v1/chat/completions")
-                ),
+                chat_completions_path=str(raw.get("chat_completions_path", "/v1/chat/completions")),
                 models=[str(m) for m in (raw.get("models", []) or [])],
-                extra_payload_defaults=dict(
-                    raw.get("extra_payload_defaults", {}) or {}
-                ),
+                extra_payload_defaults=dict(raw.get("extra_payload_defaults", {}) or {}),
             )
         )
 

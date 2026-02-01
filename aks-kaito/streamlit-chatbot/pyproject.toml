@@ -7,8 +7,8 @@
 #    - **UP**: Pyupgrade (encourages modern Python syntax for `py311`)
 # - **Relaxations (`ignore = ["E501"]`):**
 #    - **E501 (line length)** is ignored, so Ruff won’t report long lines even though `line-length = 100` is set (that value mostly affects formatters/other tools, not linting in this config).
-# - **Python version strictness (`target-version = "py311"`):**
-#    - Makes **UP** rules more aggressive about modernizing code, since Python 3.11 features are assumed available.
+# - **Python version strictness (`target-version = "py313"`):**
+#    - Makes **UP** rules more aggressive about modernizing code, since Python 3.13 features are assumed available.
 # Overall: **good correctness coverage (F, B) + modernization (UP) + import hygiene (I)**, but **not maximally strict** (many other Ruff families like security, complexity, type-related, docstring rules, etc. are not enabled).
 
 [project]
@@ -16,7 +16,7 @@ name = "kaito-streamlit-chatbot"
 version = "0.1.0"
 description = "Streamlit chatbot UI for KAITO (OpenAI-compatible Chat Completions)."
 readme = "README.md"
-requires-python = ">=3.11"
+requires-python = ">=3.13"
 dependencies = [
 	"streamlit>=1.31",
 	"requests>=2.31",
@@ -48,7 +48,7 @@ include = [
 
 [tool.ruff]
 line-length = 100
-target-version = "py311"
+target-version = "py313"
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "B", "UP"]

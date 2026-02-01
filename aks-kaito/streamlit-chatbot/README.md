@@ -6,7 +6,7 @@ A simple Streamlit chat UI that calls an OpenAI-compatible Chat Completions API 
 
 ```bash
 cd aks-kaito/streamlit-chatbot
-uv venv .venv
+uv venv --python 3.13.0 .venv
 uv sync --extra dev
 uv run streamlit run app.py
 ```

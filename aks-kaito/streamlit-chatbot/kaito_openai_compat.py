@@ -43,9 +43,7 @@ def chat_completions(
     if api_key:
         headers["Authorization"] = f"Bearer {api_key}"
 
-    resp = requests.post(
-        url, headers=headers, json=payload, timeout=timeout_s, stream=stream
-    )
+    resp = requests.post(url, headers=headers, json=payload, timeout=timeout_s, stream=stream)
     return resp
 
 
@@ -53,9 +51,7 @@ def parse_chat_completion_text(resp_json: dict[str, Any]) -> str:
     try:
         return str(resp_json["choices"][0]["message"]["content"])
     except Exception as e:  # noqa: BLE001
-        raise ChatCompletionError(
-            f"Unexpected response shape: {e}. Full JSON: {resp_json}"
-        ) from e
+        raise ChatCompletionError(f"Unexpected response shape: {e}. Full JSON: {resp_json}") from e
 
 
 def iter_sse_chat_delta_text(resp: requests.Response) -> Iterable[str]:
