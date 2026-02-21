@@ -1,0 +1,23 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: gptoss-ingress
+  namespace: default
+  annotations:
+    nginx.ingress.kubernetes.io/use-regex: "true"
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+spec:
+  ingressClassName: nginx
+  rules:
+    - http:
+        paths:
+          - path: /gptoss(/|$)(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                # GPT-OSS Service name is created from the GPT-OSS CR name.
+                # If you deploy pvc-gptoss-vector-db.yaml, switch this to: gptoss-with-storage
+                name: gpt-oss-20b
+                port:
+                  number: 80
+         
