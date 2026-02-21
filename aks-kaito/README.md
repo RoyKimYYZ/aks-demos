@@ -1,10 +1,21 @@
 # AKS + KAITO + RAG Demo (aks-kaito)
 
-This folder contains an end-to-end demo for running **KAITO model workspaces** and **RAGEngine** on **Azure Kubernetes Service (AKS)**, exposed through **ingress-nginx**, with optional Streamlit/demo apps.
+This proejct folder contains an end-to-end demo for running **KAITO model workspaces** and **RAGEngine** on **Azure Kubernetes Service (AKS)**, exposed through **ingress-nginx**, with optional Streamlit/demo apps.
 
 It is designed for technical demos and learning sessions.
 
+References
+- [KAITO Project](https://github.com/microsoft/kaito)
+- [KAITO Documentation](https://microsoft.github.io/kaito/)
+- [RAGEngine Documentation](https://microsoft.github.io/kaito/docs/reference/ragengine/)
+
+
+
+
+
 ## What this project deploys
+
+![AKS KAITO RAG demo architecture overview](kaito-ragengine-architecture-demo.jpg)
 
 - AKS cluster with OIDC/workload identity
 - KAITO Workspace controller
