@@ -1,6 +1,6 @@
 # Document Ingestion CLI (`ragengine-ingest-docs.py`)
 
-This script ingests text documents into RagEngine and can also list indexed documents or run RAG chat queries.
+This script ingests text documents into Azure Kubernetes KAITO RagEngine and can also list indexed documents or run RAG chat queries.
 
 ## What this CLI supports
 
@@ -13,7 +13,8 @@ This script ingests text documents into RagEngine and can also list indexed docu
 
 ## Prerequisites
 
-- Python 3.10+ (matches `pyproject.toml`)
+- Install AKS KAITO, workspace, and RAG engine (see [aks-kaito/README.md](../README.md))
+- Python 3.13+ (matches `pyproject.toml`)
 - `uv` installed: https://docs.astral.sh/uv/getting-started/installation/
 - Network access to RagEngine endpoint
 
@@ -210,29 +211,6 @@ uv run python ragengine-ingest-docs.py \
 
 ---
 
-## Package as a standalone executable
-
-If you want a single-file executable (no separate Python environment at runtime), use `PyInstaller`.
-
-Build:
-
-```bash
-uv run --with pyinstaller pyinstaller \
-  --onefile \
-  --name ragengine-ingest-docs \
-  ragengine-ingest-docs.py
-```
-
-Output binary:
-
-- Linux/macOS: `dist/ragengine-ingest-docs`
-- Windows: `dist/ragengine-ingest-docs.exe`
-
-Run:
-
-```bash
-./dist/ragengine-ingest-docs --help
-```
 
 Notes:
 

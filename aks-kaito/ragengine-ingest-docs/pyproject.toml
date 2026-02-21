@@ -1,7 +1,7 @@
 [project]
 name = "ragengine-ragengine-ingest-docs"
-version = "0.1.0"
-description = "Ingest a .txt file into RagEngine over HTTP"
+version = "0.1.1"
+description = "Ingest a .txt file into AKS KAITO RagEngine over HTTP"
 requires-python = ">=3.10"
 dependencies = [
   "click>=8.1.7",
