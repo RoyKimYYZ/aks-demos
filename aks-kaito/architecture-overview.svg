@@ -1,0 +1,117 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="900" viewBox="0 0 1400 900" role="img" aria-labelledby="title desc">
+  <title id="title">AKS KAITO RAG Demo Architecture Overview</title>
+  <desc id="desc">High-level flow from users to ingress, Streamlit app, KAITO workspace model, and RAGEngine with vector index on AKS.</desc>
+
+  <defs>
+    <style>
+      .title { font: 700 30px Arial, sans-serif; fill: #0f172a; }
+      .subtitle { font: 500 16px Arial, sans-serif; fill: #334155; }
+      .label { font: 700 16px Arial, sans-serif; fill: #0f172a; }
+      .small { font: 500 13px Arial, sans-serif; fill: #334155; }
+      .box { rx: 14; ry: 14; stroke-width: 2; }
+      .arrow { stroke: #334155; stroke-width: 2.5; fill: none; marker-end: url(#arrowhead); }
+      .dashed { stroke-dasharray: 8 6; }
+      .pill { rx: 999; ry: 999; }
+    </style>
+    <marker id="arrowhead" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto">
+      <polygon points="0 0, 10 4, 0 8" fill="#334155" />
+    </marker>
+  </defs>
+
+  <rect x="0" y="0" width="1400" height="900" fill="#f8fafc" />
+
+  <text x="700" y="52" text-anchor="middle" class="title">AKS + KAITO + RAG Demo</text>
+  <text x="700" y="80" text-anchor="middle" class="subtitle">What this folder demonstrates for a technical audience</text>
+
+  <!-- Users -->
+  <rect class="box" x="70" y="160" width="220" height="130" fill="#ffffff" stroke="#64748b" />
+  <text x="180" y="198" text-anchor="middle" class="label">Users / Audience</text>
+  <text x="180" y="222" text-anchor="middle" class="small">Browser, curl, CLI</text>
+  <text x="180" y="244" text-anchor="middle" class="small">Ask questions, ingest docs</text>
+
+  <!-- Ingress -->
+  <rect class="box" x="360" y="145" width="290" height="165" fill="#e0f2fe" stroke="#0284c7" />
+  <text x="505" y="183" text-anchor="middle" class="label">ingress-nginx</text>
+  <text x="505" y="208" text-anchor="middle" class="small">Single public entry point</text>
+
+  <rect class="pill" x="390" y="226" width="70" height="26" fill="#ffffff" stroke="#0284c7" />
+  <text x="425" y="244" text-anchor="middle" class="small">/phi4</text>
+
+  <rect class="pill" x="470" y="226" width="82" height="26" fill="#ffffff" stroke="#0284c7" />
+  <text x="511" y="244" text-anchor="middle" class="small">/rag*</text>
+
+  <rect class="pill" x="562" y="226" width="60" height="26" fill="#ffffff" stroke="#0284c7" />
+  <text x="592" y="244" text-anchor="middle" class="small">/chat</text>
+
+  <!-- AKS cluster container -->
+  <rect class="box" x="700" y="110" width="640" height="690" fill="#ffffff" stroke="#94a3b8" />
+  <text x="725" y="140" class="label">AKS Cluster</text>
+  <text x="725" y="160" class="small">KAITO controller + GPU provisioner + workloads</text>
+
+  <!-- Streamlit -->
+  <rect class="box" x="740" y="200" width="250" height="120" fill="#f1f5f9" stroke="#64748b" />
+  <text x="865" y="236" text-anchor="middle" class="label">Streamlit Chatbot</text>
+  <text x="865" y="258" text-anchor="middle" class="small">UI for chat + ingestion</text>
+  <text x="865" y="278" text-anchor="middle" class="small">Technical diagnostics</text>
+
+  <!-- RAGEngine -->
+  <rect class="box" x="1020" y="200" width="280" height="150" fill="#fef3c7" stroke="#d97706" />
+  <text x="1160" y="238" text-anchor="middle" class="label">RAGEngine Service</text>
+  <text x="1160" y="260" text-anchor="middle" class="small">Index / List / Chat API</text>
+  <text x="1160" y="282" text-anchor="middle" class="small">/rag and /rag-nostorage</text>
+  <text x="1160" y="304" text-anchor="middle" class="small">Retrieval + grounding</text>
+
+  <!-- Vector DB -->
+  <rect class="box" x="1020" y="390" width="280" height="130" fill="#ecfccb" stroke="#65a30d" />
+  <text x="1160" y="426" text-anchor="middle" class="label">Vector Index</text>
+  <text x="1160" y="448" text-anchor="middle" class="small">rag_index documents + metadata</text>
+  <text x="1160" y="470" text-anchor="middle" class="small">Optional persistent volume</text>
+
+  <!-- Phi4 workspace -->
+  <rect class="box" x="740" y="390" width="250" height="130" fill="#ede9fe" stroke="#7c3aed" />
+  <text x="865" y="426" text-anchor="middle" class="label">Phi-4 Workspace</text>
+  <text x="865" y="448" text-anchor="middle" class="small">workspace-phi-4-mini</text>
+  <text x="865" y="470" text-anchor="middle" class="small">OpenAI-compatible inference</text>
+
+  <!-- GPU provisioner -->
+  <rect class="box" x="740" y="570" width="250" height="120" fill="#fee2e2" stroke="#dc2626" />
+  <text x="865" y="606" text-anchor="middle" class="label">GPU Provisioner</text>
+  <text x="865" y="628" text-anchor="middle" class="small">Auto-scales GPU node pool</text>
+  <text x="865" y="648" text-anchor="middle" class="small">Managed Identity + OIDC</text>
+
+  <!-- Kaito controller -->
+  <rect class="box" x="1020" y="570" width="280" height="120" fill="#e0e7ff" stroke="#4f46e5" />
+  <text x="1160" y="606" text-anchor="middle" class="label">KAITO Workspace Controller</text>
+  <text x="1160" y="628" text-anchor="middle" class="small">Manages Workspace CRDs</text>
+  <text x="1160" y="648" text-anchor="middle" class="small">Schedules model workloads</text>
+
+  
+  <!-- Arrows -->
+  <path class="arrow" d="M290 225 L360 225" />
+  <path class="arrow" d="M650 225 L740 225" />
+  <path class="arrow" d="M650 245 L1020 245" />
+  <path class="arrow" d="M650 260 L740 260" />
+
+  <path class="arrow" d="M990 430 L1020 430" />
+  <path class="arrow" d="M1020 320 L900 390" />
+  <path class="arrow" d="M1160 350 L1160 390" />
+
+  <path class="arrow dashed" d="M865 570 L865 520" />
+  <path class="arrow dashed" d="M1160 570 L1160 350" />
+
+  <!-- Legend -->
+  <rect class="box" x="70" y="650" width="580" height="200" fill="#f4f7e8" stroke="#94a3b8" />
+  <text x="95" y="684" class="label">Demo story in one line</text>
+  <text x="95" y="710" class="small">
+    <tspan x="95" dy="0">Users hit ingress → request goes to Phi-4 or RAGEngine →</tspan>
+    <tspan x="95" dy="22">RAGEngine retrieves chunks from vector index.</tspan>
+  </text>
+  <text x="95" y="754" class="small">
+    <tspan x="95" dy="0">RAGEngine then asks Phi-4 to generate grounded responses.</tspan>
+    <tspan x="95" dy="22">Scripts in this folder automate setup and testing.</tspan>
+  </text>
+  <text x="95" y="806" class="small">
+    <tspan x="95" dy="0">Dashed arrows = control-plane automation (controller/provisioner).</tspan>
+    <tspan x="95" dy="22">Solid arrows = request and data flow.</tspan>
+  </text>
+</svg>
