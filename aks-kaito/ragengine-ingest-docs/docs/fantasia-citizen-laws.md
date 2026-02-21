@@ -1,6 +1,6 @@
 ---
 title: "Fantasia Citizen Code (FCC)"
-jurisdiction: "Island of Fantasia (fictional)"
+jurisdiction: "Island of Fantasia"
 version: "FCC-1.0"
 effective_date: "2041-04-01"
 last_updated: "2041-09-15"

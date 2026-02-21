@@ -79,7 +79,7 @@ uv run python ragengine-ingest-docs.py \
   --file ./docs/cra-tax-rules.txt \
   --index rag_index \
   --mode create \
-  --metadata author=kaito \
+  --metadata subject=tax \
   --metadata jurisdiction='"Canada"' \
   --connect-timeout 5 \
   --timeout 20 \
@@ -143,7 +143,7 @@ uv run python ragengine-ingest-docs.py \
 uv run python ragengine-ingest-docs.py \
   --index rag_index \
   --mode list \
-  --limit 5 \
+  --limit 50 \
   --offset 0 \
   --max-text-length 500
 ```
