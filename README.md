@@ -2,7 +2,7 @@
 
 Hands-on Azure Kubernetes (AKS) demos for learning and technical presentations.
 
-This repository is designed for a technical audience that wants to learn how to:
+This repository is to share my projects presented in my [blog](https://www.roykimca), [youtube videos](https://www.youtube.com/roykimyyz) and tech presentations.
 
 - provision AKS and related Azure resources,
 - run KAITO model workspaces,
