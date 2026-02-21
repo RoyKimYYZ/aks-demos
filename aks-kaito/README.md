@@ -49,11 +49,7 @@ References
 
 - Azure subscription with permission to create AKS and managed identities
 - Installed locally:
-  - `az` (Azure CLI)
-  - `kubectl`
-  - `helm`
-  - `jq`
-  - `curl`
+  - `az` (Azure CLI), `kubectl`, `helm`, `jq`, `curl`
 - Logged in to Azure: `az login`
 
 > Cost note: GPU-enabled AKS workloads can incur significant cost. Clean up resources after demos.
