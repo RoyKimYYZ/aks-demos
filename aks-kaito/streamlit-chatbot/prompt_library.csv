@@ -1,0 +1,12 @@
+name,prompt,updated_at
+CRA - tax rules,What are CRA tax rules for families?,2026-02-21T13:52:46.432756+00:00
+Soc2 - controls,What are the Northwind Corporation SOC 2-Aligned Azure Networking Security Controls?,2026-02-21T13:52:24.784355+00:00
+Soc2 - tags,What are tags for the document Northwind Corporation SOC 2-Aligned Azure Networking Security Controls?,2026-02-21T14:06:08.706791+00:00
+Fantasia - laws,What are the citizen codes in Island of Fantasia?,2026-02-21T14:06:08.706791+00:00
+Fantasia - citizen knowledge,What do the citizens of Fantasia Island need to know about the laws?,2026-02-21T14:06:08.706791+00:00
+Fantasia - citizen code,What is the Fantasia Citizen Code (FCC)?,2026-02-21T14:06:08.706791+00:00
+Grounded JSON,"From retrieved chunks only, return strict JSON with keys: answer, evidence_quotes, source_filenames, confidence. Rules: evidence_quotes must be an array of exact verbatim quotes copied from retrieved text (no paraphrase), source_filenames must only contain retrieved metadata filenames, and if evidence is insufficient set answer to 'insufficient_evidence' with evidence_quotes as an empty array.",2026-02-21T15:05:00+00:00
+Citation Check,"Answer the question and include exactly 3 direct quotes from source chunks. For each quote, add filename and chunk_index. If any claim is not quoted, state 'unverified'.",2026-02-21T14:30:00+00:00
+Compare Sources,"Compare what two retrieved chunks agree on versus where they differ. Output sections: Agreements, Differences, Open Questions. Do not use prior knowledge.",2026-02-21T14:30:00+00:00
+Metadata Focus,"Summarize controls grouped by metadata fields (filename, chunk_index, tags if present). Return a compact markdown table with evidence-backed rows only.",2026-02-21T14:30:00+00:00
+Hallucination Test,"Answer briefly, then run a self-check: list each claim with status [grounded|not_grounded] and supporting quote. Omit claims that are not grounded.",2026-02-21T14:30:00+00:00
