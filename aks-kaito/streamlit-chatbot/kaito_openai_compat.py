@@ -48,10 +48,44 @@ def chat_completions(
 
 
 def parse_chat_completion_text(resp_json: dict[str, Any]) -> str:
-    try:
-        return str(resp_json["choices"][0]["message"]["content"])
-    except Exception as e:  # noqa: BLE001
-        raise ChatCompletionError(f"Unexpected response shape: {e}. Full JSON: {resp_json}") from e
+    def _as_non_empty_text(value: Any) -> str | None:
+        if isinstance(value, str):
+            text = value.strip()
+            return text or None
+        if isinstance(value, list):
+            parts: list[str] = []
+            for item in value:
+                if isinstance(item, dict):
+                    candidate = item.get("text") or item.get("content")
+                    if isinstance(candidate, str) and candidate.strip():
+                        parts.append(candidate.strip())
+                elif isinstance(item, str) and item.strip():
+                    parts.append(item.strip())
+            if parts:
+                return "\n".join(parts)
+        return None
+
+    choices = resp_json.get("choices")
+    if isinstance(choices, list) and choices:
+        first = choices[0] if isinstance(choices[0], dict) else {}
+        message = first.get("message") if isinstance(first, dict) else None
+        if isinstance(message, dict):
+            direct = _as_non_empty_text(message.get("content"))
+            if direct:
+                return direct
+        direct_text = _as_non_empty_text(first.get("text")) if isinstance(first, dict) else None
+        if direct_text:
+            return direct_text
+
+    for key in ("output_text", "response", "answer", "content", "text"):
+        candidate = _as_non_empty_text(resp_json.get(key))
+        if candidate:
+            return candidate
+
+    raise ChatCompletionError(
+        "Response contained no assistant text content. Full JSON: "
+        f"{resp_json}"
+    )
 
 
 def iter_sse_chat_delta_text(resp: requests.Response) -> Iterable[str]:

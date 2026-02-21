@@ -302,6 +302,43 @@ def _print_result(result: Dict[str, Any], *, mode: str, json_out: bool, show_sou
         click.echo(json.dumps(result, indent=2, sort_keys=True))
 
 
+def _resolve_model_name(
+    base_url_eff: str,
+    model: str | None,
+    *,
+    connect_timeout: int,
+    timeout: int,
+) -> str:
+    if model:
+        return model
+
+    endpoint = urljoin(base_url_eff, "v1/models")
+    try:
+        result = request_json_with_retries(
+            "GET",
+            endpoint,
+            connect_timeout_s=connect_timeout,
+            timeout_s=timeout,
+            retries=1,
+        )
+        data = result.get("data") if isinstance(result, dict) else None
+        if isinstance(data, list) and data:
+            first = data[0] if isinstance(data[0], dict) else None
+            model_id = (first or {}).get("id") if isinstance(first, dict) else None
+            if isinstance(model_id, str) and model_id.strip():
+                click.echo(f"Using auto-detected model: {model_id}", err=True)
+                return model_id
+    except Exception:
+        pass
+
+    fallback_model = os.environ.get("RAGENGINE_DEFAULT_MODEL", "phi-4-mini-instruct")
+    click.echo(
+        f"Model auto-discovery failed; using fallback model: {fallback_model}",
+        err=True,
+    )
+    return fallback_model
+
+
 @click.command(context_settings={"help_option_names": ["-h", "--help"]})
 @click.option("--file", "file_path", type=click.Path(exists=True, dir_okay=False), help="Path to .txt file (required for create/update)")
 @click.option("--index", required=True, help="Index name (e.g., rag_index)")
@@ -359,7 +396,7 @@ def _print_result(result: Dict[str, Any], *, mode: str, json_out: bool, show_sou
     default=None,
     envvar="RAGENGINE_MODEL",
     show_envvar=True,
-    help="Chat mode: model identifier (compatibility field). If omitted, uses $RAGENGINE_MODEL, else 'example_model'.",
+    help="Chat mode: model identifier (compatibility field). If omitted, auto-detects from /v1/models.",
 )
 @click.option("--temperature", type=float, default=0.7, show_default=True, help="Chat mode: sampling temperature (0.0 to 1.0)")
 @click.option("--max-tokens", type=int, default=2048, show_default=True, help="Chat mode: max tokens to generate")
@@ -447,7 +484,12 @@ def cli(
         if not q:
             raise click.ClickException("Chat/query mode requires --question or --question-file.")
 
-        model_name = model or "example_model"
+        model_name = _resolve_model_name(
+            base_url_eff,
+            model,
+            connect_timeout=connect_timeout,
+            timeout=timeout,
+        )
         endpoint = urljoin(base_url_eff, "v1/chat/completions")
         payload = {
             "index_name": index,

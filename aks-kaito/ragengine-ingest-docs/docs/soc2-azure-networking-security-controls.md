@@ -1,5 +1,5 @@
 ---
-title: "SOC 2-Aligned Azure Networking Security Controls (Typical)"
+title: "Northwind Corporation SOC 2-Aligned Azure Networking Security Controls"
 version: "1.0"
 last_updated: "2026-01-11"
 intended_use: "Knowledge base document for vector DB ingestion and RAG Q&A"

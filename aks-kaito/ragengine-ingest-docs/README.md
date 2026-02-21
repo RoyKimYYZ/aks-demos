@@ -84,6 +84,8 @@ uv run python ragengine-ingest-docs.py \
   --connect-timeout 5 \
   --timeout 20 \
   --retries 1
+
+
 ```
 
 With JSON metadata:
@@ -109,11 +111,11 @@ uv run python ragengine-ingest-docs.py \
 
   # Mix simple and JSON metadata
   uv run python ragengine-ingest-docs.py \
-    --file ./document.txt \
+    --file ./docs/soc2-azure-networking-security-controls.md \
     --index rag_index \
     --mode create \
-    --metadata author=kaito \
-    --metadata-json '{"tags":["important","2025"],"reviewed":true}'
+    --metadata subject=soc2 \
+    --metadata-json '{"tags":["cloud","azure"],"reviewed":true}'
 
   # Complex JSON with nested structures
   uv run python ragengine-ingest-docs.py \
@@ -167,8 +169,33 @@ uv run python ragengine-ingest-docs.py \
 uv run python ragengine-ingest-docs.py \
   --index rag_index \
   --mode chat \
-  --question "What benefits are income-tested for families?" \
+  --question "According to CRA rules, What benefits are income-tested for families?" \
+  --model phi-4-mini-instruct \
   --show-sources
+
+uv run python ragengine-ingest-docs.py \
+  --index rag_index \
+  --mode chat \
+  --question "What is the Fantasia Citizen Code (FCC)?" \
+  --model phi-4-mini-instruct \
+  --show-sources
+
+uv run python ragengine-ingest-docs.py \
+  --index rag_index \
+  --mode chat \
+  --question "What are the Northwind Corporation SOC 2-Aligned Azure Networking Security Controls?" \
+  --model phi-4-mini-instruct \
+  --show-sources
+
+uv run python ragengine-ingest-docs.py \
+  --index rag_index \
+  --mode chat \
+  --question "what are tags for the document Northwind Corporation SOC 2-Aligned Azure Networking Security Controls?" \
+  --model phi-4-mini-instruct \
+  --show-sources
+  
+
+
 ```
 
 Question from file:
@@ -177,6 +204,7 @@ Question from file:
 uv run python ragengine-ingest-docs.py \
   --index rag_index \
   --mode chat \
+  --model phi-4-mini-instruct \
   --question-file ./my-question.txt
 ```
 
@@ -255,7 +283,7 @@ uv run ragengine-ingest-docs --help
 - `--question` question text
 - `--question-file` read question from file
 - `--system` system prompt (default: `You are a helpful assistant.`)
-- `--model` model name (or `RAGENGINE_MODEL`; default fallback: `example_model`)
+- `--model` model name (or `RAGENGINE_MODEL`; if omitted, auto-detected from `/v1/models`, else fallback `phi-4-mini-instruct` or `RAGENGINE_DEFAULT_MODEL`)
 - `--temperature` (default: `0.7`)
 - `--max-tokens` (default: `2048`)
 - `--context-token-ratio` (default: `0.5`)
