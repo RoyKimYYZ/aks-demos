@@ -243,7 +243,7 @@ curl -X POST http://$INGRESS_IP/phi4/v1/chat/completions \
 
 # Demo Scenario: Index and Query Land of Fantasia laws
 # Assumes you already have INGRESS_IP + RAG_PATH set (e.g., RAG_PATH=rag-nostorage)
-DOC_FILE="document-ingestion/fantasia-citizen-laws.md"
+DOC_FILE="ragengine-ingest-docs/fantasia-citizen-laws.md"
 
 curl -sS -X POST "http://$INGRESS_IP/$RAG_PATH/index" \
   -H "Content-Type: application/json" \
