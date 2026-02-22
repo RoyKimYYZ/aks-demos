@@ -1,0 +1,120 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1040" viewBox="0 0 1600 1040" role="img" aria-labelledby="title desc">
+  <title id="title">ragengine-ingest-docs CLI functionality infographic</title>
+  <desc id="desc">Visual overview of modes, endpoints, data flow, and key options for the ragengine-ingest-docs command line tool.</desc>
+
+  <defs>
+    <style>
+      .bg { fill: #f8fafc; }
+      .title { font: 700 34px Arial, sans-serif; fill: #0f172a; }
+      .subtitle { font: 500 16px Arial, sans-serif; fill: #334155; }
+      .h { font: 700 18px Arial, sans-serif; fill: #0f172a; }
+      .t { font: 500 14px Arial, sans-serif; fill: #334155; }
+      .tiny { font: 500 12px Arial, sans-serif; fill: #475569; }
+      .box { rx: 14; ry: 14; stroke-width: 2; }
+      .pill { rx: 999; ry: 999; }
+      .arrow { stroke: #334155; stroke-width: 2.5; fill: none; marker-end: url(#arrow); }
+      .dashed { stroke-dasharray: 8 6; }
+    </style>
+    <marker id="arrow" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto">
+      <polygon points="0 0, 10 4, 0 8" fill="#334155" />
+    </marker>
+  </defs>
+
+  <rect class="bg" x="0" y="0" width="1600" height="1040"/>
+
+  <text x="800" y="52" text-anchor="middle" class="title">ragengine-ingest-docs CLI</text>
+  <text x="800" y="80" text-anchor="middle" class="subtitle">Ingest, update, list, and query documents through RagEngine OpenAI-compatible endpoints</text>
+
+  <!-- Entry -->
+  <rect class="box" x="70" y="120" width="360" height="170" fill="#ffffff" stroke="#64748b"/>
+  <text x="95" y="152" class="h">1) Command entry</text>
+  <text x="95" y="178" class="t">uv run python ragengine-ingest-docs.py</text>
+  <text x="95" y="203" class="t">--index rag_index --mode ... [options]</text>
+  <text x="95" y="232" class="tiny">Base URL resolution order:</text>
+  <text x="95" y="252" class="tiny">--base-url → RAGENGINE_URL → http://$INGRESS_IP</text>
+
+  <!-- Modes -->
+  <rect class="box" x="470" y="120" width="1060" height="170" fill="#eef2ff" stroke="#6366f1"/>
+  <text x="495" y="152" class="h">2) Mode selection</text>
+
+  <rect class="pill" x="500" y="174" width="170" height="34" fill="#ffffff" stroke="#4f46e5"/>
+  <text x="585" y="197" text-anchor="middle" class="t">create</text>
+
+  <rect class="pill" x="690" y="174" width="170" height="34" fill="#ffffff" stroke="#4f46e5"/>
+  <text x="775" y="197" text-anchor="middle" class="t">update</text>
+
+  <rect class="pill" x="880" y="174" width="170" height="34" fill="#ffffff" stroke="#4f46e5"/>
+  <text x="965" y="197" text-anchor="middle" class="t">list</text>
+
+  <rect class="pill" x="1070" y="174" width="170" height="34" fill="#ffffff" stroke="#4f46e5"/>
+  <text x="1155" y="197" text-anchor="middle" class="t">chat</text>
+
+  <rect class="pill" x="1260" y="174" width="170" height="34" fill="#ffffff" stroke="#4f46e5"/>
+  <text x="1345" y="197" text-anchor="middle" class="t">query</text>
+
+  <text x="500" y="240" class="tiny">create/update require --file; list/chat/query do not</text>
+  <text x="500" y="260" class="tiny">metadata flags apply only to create/update</text>
+
+  <!-- Left flow: create/update -->
+  <rect class="box" x="70" y="340" width="730" height="320" fill="#fff7ed" stroke="#ea580c"/>
+  <text x="95" y="372" class="h">A) create / update flow</text>
+
+  <rect class="box" x="95" y="392" width="310" height="110" fill="#ffffff" stroke="#f97316"/>
+  <text x="115" y="420" class="t">Read local text file</text>
+  <text x="115" y="442" class="tiny">Chunk by paragraph (+ overlap)</text>
+  <text x="115" y="464" class="tiny">Build metadata: filename, path, timestamps</text>
+  <text x="115" y="486" class="tiny">Add chunk_index + chunk_count</text>
+
+  <rect class="box" x="430" y="392" width="345" height="110" fill="#ffffff" stroke="#f97316"/>
+  <text x="450" y="420" class="t">Build document payload</text>
+  <text x="450" y="442" class="tiny">create: text + metadata</text>
+  <text x="450" y="464" class="tiny">update: doc_id + text + hash_value + metadata</text>
+  <text x="450" y="486" class="tiny">doc_id is deterministic from path + chunk index</text>
+
+  <rect class="box" x="95" y="528" width="680" height="112" fill="#ffffff" stroke="#f97316"/>
+  <text x="115" y="556" class="t">POST endpoint</text>
+  <text x="115" y="578" class="tiny">create → {base_url}/rag/index (or /index when base has path)</text>
+  <text x="115" y="600" class="tiny">update → {base_url}/indexes/{index_name}/documents</text>
+  <text x="115" y="622" class="tiny">HTTP retries with exponential backoff</text>
+
+  <!-- Right top: list -->
+  <rect class="box" x="840" y="340" width="690" height="145" fill="#ecfeff" stroke="#0891b2"/>
+  <text x="865" y="372" class="h">B) list flow</text>
+  <text x="865" y="400" class="t">GET {base_url}/indexes/{index_name}/documents</text>
+  <text x="865" y="423" class="tiny">Parameters: limit, offset, max_text_length, metadata_filter(JSON)</text>
+  <text x="865" y="447" class="tiny">Use to inspect indexed chunks and metadata coverage</text>
+
+  <!-- Right middle: chat/query -->
+  <rect class="box" x="840" y="505" width="690" height="205" fill="#f0fdf4" stroke="#16a34a"/>
+  <text x="865" y="537" class="h">C) chat / query flow</text>
+  <text x="865" y="565" class="t">POST {base_url}/v1/chat/completions</text>
+  <text x="865" y="588" class="tiny">Payload includes: index_name, model, messages, temperature, max_tokens, context_token_ratio</text>
+  <text x="865" y="611" class="tiny">Model resolution: --model → /v1/models auto-detect → fallback</text>
+  <text x="865" y="634" class="tiny">Input via --question or --question-file</text>
+  <text x="865" y="657" class="tiny">Output modes:</text>
+  <text x="895" y="679" class="tiny">• default: assistant text</text>
+  <text x="895" y="699" class="tiny">• --json: full response JSON</text>
+
+  <!-- Output -->
+  <rect class="box" x="70" y="740" width="1460" height="185" fill="#ffffff" stroke="#94a3b8"/>
+  <text x="95" y="772" class="h">4) Output and troubleshooting signals</text>
+  <text x="95" y="798" class="t">Standard output: pretty JSON for create/update/list, text-first for chat/query unless --json is used</text>
+  <text x="95" y="823" class="tiny">Helpful flags: --show-sources, --metadata-filter, --connect-timeout, --timeout, --retries</text>
+  <text x="95" y="847" class="tiny">If no RAG grounding appears, verify: endpoint path, index content, max_tokens/context_token_ratio, and source_nodes in JSON</text>
+  <text x="95" y="871" class="tiny">Common endpoints: /phi4/v1/chat/completions (model only) vs /rag(-nostorage)/v1/chat/completions (RAG path)</text>
+  <text x="95" y="895" class="tiny">This CLI is intended for demo and learning workflows: ingest docs → verify index → run grounded RAG queries</text>
+
+  <!-- Arrows -->
+  <path class="arrow" d="M430 205 L470 205"/>
+  <path class="arrow" d="M585 208 L585 340"/>
+  <path class="arrow" d="M775 208 L775 340"/>
+  <path class="arrow" d="M965 208 L965 340"/>
+  <path class="arrow" d="M1155 208 L1155 505"/>
+  <path class="arrow" d="M1345 208 L1345 505"/>
+
+  <path class="arrow" d="M405 446 L430 446"/>
+  <path class="arrow dashed" d="M602 502 L602 528"/>
+
+  <path class="arrow" d="M1160 710 L1160 740"/>
+  <path class="arrow" d="M435 660 L435 740"/>
+</svg>
