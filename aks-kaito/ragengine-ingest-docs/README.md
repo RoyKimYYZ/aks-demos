@@ -49,21 +49,24 @@ The CLI resolves the RagEngine URL in this order:
 2. `RAGENGINE_URL`
 3. `http://$INGRESS_IP`
 
-If you set `INGRESS_IP` but still see requests going to another host, check and unset `RAGENGINE_URL`:
+Set the `INGRESS_IP` environment variable to your public load balancer IP or DNS name:
 
 ```bash
-unset RAGENGINE_URL
+INGRESS_IP=$(kubectl get svc ingress-nginx-controller -n ingress-nginx -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+echo "INGRESS_IP: $INGRESS_IP"
 ```
 
-Examples:
+Example values:
 
 ```bash
-export INGRESS_IP="ai.roykim.ca" # or public ip address
-# or
+export INGRESS_IP="ai.roykim.ca"  # DNS name; OR
+export INGRESS_IP="20.51.100.42"  # Public IP address
+
+# alternate option
 export RAGENGINE_URL="http://ai.roykim.ca/rag-nostorage"
 ```
 
-Force a one-off explicit target (bypasses env ambiguity):
+Optional: Force a one-off explicit target (bypasses env ambiguity):
 
 ```bash
 uv run python ragengine-ingest-docs.py --base-url http://ai.roykim.ca/rag-nostorage --index rag_index --mode create --file ./docs/cra-tax-rules.txt

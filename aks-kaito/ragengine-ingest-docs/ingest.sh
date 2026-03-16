@@ -40,7 +40,7 @@ uv sync
 INGRESS_IP=$(kubectl get svc ingress-nginx-controller -n ingress-nginx -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
 echo "INGRESS_IP: $INGRESS_IP"
 DOCUMENT_FILE="./docs/cra-tax-rules.txt"
-index_name="tax_index"
+index_name="rag_index"
 uv run python ragengine-ingest-docs.py --base-url "http://$INGRESS_IP" --file "$DOCUMENT_FILE" --index "$index_name" --mode create
 
 # Update docs in an existing index:

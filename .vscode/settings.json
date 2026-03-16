@@ -1,6 +1,10 @@
 {
     "chat.tools.terminal.autoApprove": {
         "kubectl get": true,
-        "kubectl exec": true
+        "kubectl exec": true,
+        "/^python - <<'PY'\nimport json\nfiles=\\{\n'vnet':'call_PSRRYsNuCvlaPqDHAvjXQqml__vscode-1771798434551/content\\.json',\n'nsg':'call_MYlVPlgVxBumAsDhDrtCWYlW__vscode-1771798434552/content\\.json',\n'rt':'call_zvzOuAk2eHqmn3UHi7xIvDjQ__vscode-1771798434553/content\\.json',\n'nat':'call_Q0w47V9Fm3Zmb2PQlXotALO3__vscode-1771798434554/content\\.json',\n'rg':'call_fdaPQO5yq1FussWw1FPAbrBe__vscode-1771798434555/content\\.json',\n\\}\nbase='/home/rkadmin/\\.vscode-server/data/User/workspaceStorage/34a99b652646e2be153a1977eea6df65/GitHub\\.copilot-chat/chat-session-resources/e84cba12-1551-4c69-8462-04544a52fa5d/'\nfor k,rel in files\\.items\\(\\):\n    t=json\\.load\\(open\\(base\\+rel\\)\\)\\['moduleExamples'\\]\n    i=t\\.find\\('br/public:avm/res'\\)\n    print\\('\\\\n===',k,'index',i\\)\n    if i!=-1:\n      print\\(t\\[i-120:i\\+220\\]\\.replace\\('\\\\n',' '\\)\\)\nPY$/": {
+            "approve": true,
+            "matchCommandLine": true
+        }
     }
 }

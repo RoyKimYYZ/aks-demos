@@ -13,7 +13,8 @@ spec:
   ingressClassName: nginx
   rules:
     # Path-based routing with path rewriting
-    - http:
+    - host: ai.roykim.ca
+      http:
         paths:
           - path: /chat(/|$)(.*)
             pathType: ImplementationSpecific
@@ -38,18 +39,25 @@ spec:
                 name: ragengine-example
                 port:
                   number: 80
-          - path: /phi4(/|$)(.*)
+          - path: /phi4-mini(/|$)(.*)
             pathType: ImplementationSpecific
             backend:
               service:
                 name: workspace-phi-4-mini
                 port:
                   number: 80
+          - path: /phi4(/|$)(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: workspace-phi-4
+                port:
+                  number: 80
           
           # Streamlit-based UIs may call absolute paths like /_stcore/*.
           # This catch-all keeps /rag and /phi4 working (they're above), while
           # ensuring those absolute paths still reach the chat service.
-          - path: /()(.*)
+          - path: /kaitochat
             pathType: ImplementationSpecific
             backend:
               service:

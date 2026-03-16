@@ -117,8 +117,12 @@ kubectl get pods -n gpu-provisioner
 kubectl logs --selector=app.kubernetes.io/name=gpu-provisioner -n gpu-provisioner
 
 # Deploy a KAITO Workspace with GPU (phi-4-mini)
+kubectl apply -f phi-4-mini-workspace.yaml
+# Deploy a KAITO Workspace with GPU (phi-4)
 kubectl apply -f phi-4-workspace.yaml
 
+kubectl get workspace -n default -o wide
+# kubectl delete -f phi-4-mini-workspace.yaml
 # kubectl delete -f phi-4-workspace.yaml
 
 # verify 
@@ -139,13 +143,14 @@ kubectl get svc -n default -o wide
 kubectl get pods -n default -o wide
 
 # Test inference api with port-forwarding
-kubectl port-forward -n default svc/workspace-phi-4-mini 8080:80
+kubectl port-forward -n default svc/workspace-phi-4 8080:80
+#kubectl port-forward -n default svc/workspace-phi-4-mini 8080:80
 
 # Test Workspace inference via port-forwarding in another terminal
 curl -sS "http://localhost:8080/v1/chat/completions" \
   -H "Content-Type: application/json" \
   -d '{
-    "model": "phi-4-mini-instruct",
+    "model": "phi-4",
     "messages": [
       {"role": "system", "content": "You are a helpful assistant."},
       {"role": "user", "content": "Hello! Briefly introduce yourself. What are some healthy meals with 600 calories?"}
