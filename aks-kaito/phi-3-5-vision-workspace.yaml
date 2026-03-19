@@ -1,0 +1,59 @@
+apiVersion: kaito.sh/v1beta1
+kind: Workspace
+metadata:
+  name: workspace-phi-3-5-vision
+resource:
+  instanceType: "Standard_NC24ads_A100_v4"   # 1× A100 80GB — sufficient for ~4B vision model
+  labelSelector:
+    matchLabels:
+      apps: phi-3-5-vision
+inference:
+  template:
+    spec:
+      containers:
+        - name: phi-3-5-vision
+          image: vllm/vllm-openai:v0.7.3   # vLLM — native OpenAI-compatible vision support
+          ports:
+            - containerPort: 5000
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 5000
+              scheme: HTTP
+            initialDelaySeconds: 600        # model download + load can take time
+            periodSeconds: 10
+            failureThreshold: 3
+            successThreshold: 1
+            timeoutSeconds: 1
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 5000
+              scheme: HTTP
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            failureThreshold: 3
+            successThreshold: 1
+            timeoutSeconds: 1
+          resources:
+            requests:
+              nvidia.com/gpu: "1"
+            limits:
+              nvidia.com/gpu: "1"
+          args:
+            - "--model"
+            - "microsoft/Phi-3.5-vision-instruct"
+            - "--trust-remote-code"
+            - "--dtype"
+            - "bfloat16"
+            - "--max-model-len"
+            - "8192"               # vision inputs need more context; 80GB A100 can handle this
+            - "--port"
+            - "5000"
+          volumeMounts:
+            - name: dshm
+              mountPath: /dev/shm
+      volumes:
+        - name: dshm
+          emptyDir:
+            medium: Memory
