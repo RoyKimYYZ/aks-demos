@@ -50,7 +50,14 @@ spec:
             pathType: ImplementationSpecific
             backend:
               service:
-                name: workspace-phi-4
+                name: workspace-phi-4-mini
+                port:
+                  number: 80
+          - path: /phi35vision(/|$)(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: workspace-phi-3-5-vision
                 port:
                   number: 80
           
