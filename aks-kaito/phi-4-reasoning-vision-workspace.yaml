@@ -1,0 +1,59 @@
+apiVersion: kaito.sh/v1beta1
+kind: Workspace
+metadata:
+  name: workspace-phi-4-reasoning-vision
+resource:
+  instanceType: "Standard_NC24ads_A100_v4"   # 1× A100 80GB — 15B bf16 ≈ 30GB + KV cache fits comfortably
+  labelSelector:
+    matchLabels:
+      apps: phi-4-reasoning-vision
+inference:
+  template:
+    spec:
+      containers:
+        - name: phi-4-reasoning-vision
+          image: vllm/vllm-openai:v0.17.1   # vLLM — model requires >= 0.15.2; latest stable
+          ports:
+            - containerPort: 5000
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 5000
+              scheme: HTTP
+            initialDelaySeconds: 900        # 15B model download + load takes longer
+            periodSeconds: 10
+            failureThreshold: 3
+            successThreshold: 1
+            timeoutSeconds: 1
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 5000
+              scheme: HTTP
+            initialDelaySeconds: 120
+            periodSeconds: 10
+            failureThreshold: 3
+            successThreshold: 1
+            timeoutSeconds: 1
+          resources:
+            requests:
+              nvidia.com/gpu: "1"
+            limits:
+              nvidia.com/gpu: "1"
+          args:
+            - "--model"
+            - "microsoft/Phi-4-reasoning-vision-15B"
+            - "--trust-remote-code"
+            - "--dtype"
+            - "bfloat16"
+            - "--max-model-len"
+            - "16384"             # native context length; A100 80GB handles KV cache at this size
+            - "--port"
+            - "5000"
+          volumeMounts:
+            - name: dshm
+              mountPath: /dev/shm
+      volumes:
+        - name: dshm
+          emptyDir:
+            medium: Memory
