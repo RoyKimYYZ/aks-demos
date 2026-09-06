@@ -166,9 +166,8 @@ echo $podname
 kubectl exec $podname -n $keyVaultDemoNamespace -- ls /mnt/secrets-store/ 
 ## print a test secret 'ExampleSecret' held in secrets-store
 kubectl exec $podname -n $keyVaultDemoNamespace -- cat /mnt/secrets-store/ExampleSecret; echo
-## Display the environment variables that includes the secret
-kubectl exec $podname -n $keyVaultDemoNamespace -- printenv
-kubectl exec busybox-secrets-store-inline-uami -n $keyVaultDemoNamespace -- env $EXAMPLE_SECRET
+## Display the synced secret environment variable
+kubectl exec $podname -n $keyVaultDemoNamespace -- printenv EXAMPLE_SECRET
 
 
 

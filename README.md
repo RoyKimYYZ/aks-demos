@@ -2,7 +2,7 @@
 
 Hands-on Azure Kubernetes (AKS) demos for learning and technical presentations.
 
-This repository is to share my projects presented in my [blog](https://www.roykimca), [youtube videos](https://www.youtube.com/roykimyyz) and tech presentations.
+This repository is to share my projects presented in my [blog](https://roykim.ca), [youtube videos](https://www.youtube.com/roykimyyz) and tech presentations.
 
 - provision AKS and related Azure resources,
 - run KAITO model workspaces,
@@ -70,3 +70,7 @@ AKS + Azure Key Vault integration demos.
 
 - This repo is intentionally demo-focused and optimized for teaching concepts.
 - GPU-backed workloads can incur cloud cost; remember to clean up resources after labs/demos.
+
+## License
+
+This project is licensed under the [MIT License](LICENSE).
