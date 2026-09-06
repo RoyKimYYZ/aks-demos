@@ -12,7 +12,7 @@ inference:
     spec:
       containers:
         - name: phi-4-reasoning-vision
-          image: vllm/vllm-openai:v0.17.1   # vLLM — model requires >= 0.15.2; latest stable
+          image: rkaksacr.azurecr.io/phi4rv-vllm:v0.17.1   # custom vllm v0.17.1 + phi_4_rv_vllm_plugin (CUDA 13.0 compat)
           ports:
             - containerPort: 5000
           livenessProbe:
@@ -43,6 +43,8 @@ inference:
           args:
             - "--model"
             - "microsoft/Phi-4-reasoning-vision-15B"
+            - "--served-model-name"
+            - "Phi-4-reasoning-vision-15B"
             - "--trust-remote-code"
             - "--dtype"
             - "bfloat16"

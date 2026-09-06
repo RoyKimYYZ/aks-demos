@@ -1,5 +1,5 @@
 export RESOURCE_GROUP="aks-solution"
-export CLUSTER_NAME="rkaksdev"
+export CLUSTER_NAME="rk-aks"
 
 # Check services in default namespace
 kubectl get svc -n default 

@@ -4,7 +4,7 @@
 set -euo pipefail
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 WS=workspace-phi-4-reasoning-vision
-MODEL=microsoft/Phi-4-reasoning-vision-15B
+MODEL=Phi-4-reasoning-vision-15B   # matches --served-model-name in workspace YAML
 IMG="${1:-$DIR/salad.jpg}"
 
 # Step 1 — Deploy

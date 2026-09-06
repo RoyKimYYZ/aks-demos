@@ -60,6 +60,13 @@ spec:
                 name: workspace-phi-3-5-vision
                 port:
                   number: 80
+          - path: /phi4rv(/|$)(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: workspace-phi-4-reasoning-vision
+                port:
+                  number: 80
           
           # Streamlit-based UIs may call absolute paths like /_stcore/*.
           # This catch-all keeps /rag and /phi4 working (they're above), while

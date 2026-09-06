@@ -8,9 +8,9 @@ controller:
     - name: LOCATION
       value: canadacentral
     - name: AZURE_CLUSTER_NAME
-      value: rkaksdev
+      value: rkaks
     - name: AZURE_NODE_RESOURCE_GROUP
-      value: MC_aks-solution_rkaksdev_canadacentral
+      value: MC_aks-solution_rkaks_canadacentral
     - name: ARM_RESOURCE_GROUP
       value: aks-solution
     - name: LEADER_ELECT # disable leader election for better debugging experience

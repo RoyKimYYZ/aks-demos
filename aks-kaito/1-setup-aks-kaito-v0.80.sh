@@ -1,5 +1,5 @@
 export RESOURCE_GROUP="aks-solution"
-export CLUSTER_NAME="rkaksdev"
+export CLUSTER_NAME="rkaks"
 export LOCATION="canadacentral"
 
 az login --use-device-code
