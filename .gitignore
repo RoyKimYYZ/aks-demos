@@ -1,0 +1,20 @@
+# Python bytecode and tooling caches
+__pycache__/
+*.py[cod]
+.mypy_cache/
+.ruff_cache/
+
+# Terraform local state and generated plans
+.terraform/
+terraform.tfstate
+terraform.tfstate.*
+*.tfplan
+tfplan
+
+# Local VS Code workspace settings
+**/.vscode/settings.json
+
+# Generated Python packages
+build/
+dist/
+aks-kaito/blog/opencode-agent-aks-qwen3-14b.pdf
